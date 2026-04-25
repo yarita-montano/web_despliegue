@@ -1,0 +1,71 @@
+<div class="solicitudes-container">
+  <header class="solicitudes-header">
+    <button class="btn-back" (click)="volver()">← Volver</button>
+    <h1>📋 Solicitudes del Taller</h1>
+    <button class="btn-refresh" (click)="cargarSolicitudes()" [disabled]="cargando()">
+      🔄 Refrescar
+    </button>
+  </header>
+
+  <nav class="filtros">
+    @for (estado of estadosDisponibles; track estado) {
+      <button
+        class="filtro-btn"
+        [class.activo]="filtroEstado() === estado"
+        (click)="cambiarFiltro(estado)"
+      >
+        {{ etiquetaEstado(estado) }}
+      </button>
+    }
+  </nav>
+
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+
+  @if (cargando()) {
+    <div class="loading">Cargando solicitudes...</div>
+  } @else if (solicitudes().length === 0) {
+    <div class="empty">
+      <p>No hay solicitudes en estado "{{ filtroEstado() }}"</p>
+    </div>
+  } @else {
+    <div class="solicitudes-list">
+      @for (s of solicitudes(); track s.id_asignacion) {
+        <div class="solicitud-card" (click)="verDetalle(s)">
+          <div class="card-header">
+            <span class="badge badge-{{ s.estado.nombre }}">
+              {{ etiquetaEstado(s.estado.nombre) }}
+            </span>
+            @if (s.incidente.prioridad) {
+              <span class="badge badge-prioridad prioridad-{{ s.incidente.prioridad.nivel }}">
+                {{ s.incidente.prioridad.nivel }}
+              </span>
+            }
+          </div>
+
+          <h3 class="card-title">
+            {{ s.incidente.usuario.nombre }} • {{ s.incidente.vehiculo.placa }}
+          </h3>
+
+          <p class="card-categoria">
+            {{ s.incidente.categoria?.nombre || 'Sin categoría' }}
+          </p>
+
+          <p class="card-resumen">
+            {{ s.incidente.resumen_ia || s.incidente.descripcion_usuario || '-' }}
+          </p>
+
+          <div class="card-footer">
+            @if (s.eta_minutos) {
+              <span class="eta">⏱️ ETA: {{ s.eta_minutos }} min</span>
+            }
+            <span class="fecha">
+              {{ s.incidente.created_at | date:'short' }}
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

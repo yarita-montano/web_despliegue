@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, TallerAuth } from '../../shared/services/auth.service';
-import { TallerService, Taller, Tecnico } from '../../shared/services/taller.service';
+import { TallerService, Taller, Tecnico, TecnicoCreate, TecnicoUpdate } from '../../shared/services/taller.service';
+import { AsignacionesService } from '../../shared/services/asignaciones.service';
+import { AsignacionTaller } from '../../shared/models/asignacion.model';
 
 @Component({
   selector: 'app-dashboard-taller',
@@ -16,14 +18,26 @@ export class DashboardTallerComponent implements OnInit {
   currentTaller: TallerAuth | null = null;
   taller: Taller | null = null;
   tecnicos: Tecnico[] = [];
-  
+  disponible = false;
+  cambiandoDisponibilidad = false;
+
+  solicitudesPendientes: AsignacionTaller[] = [];
+  cargandoSolicitudes = false;
+  errorSolicitudes: string | null = null;
+
+  mostrarInfoTaller = false;
+  cargandoInfoTaller = false;
+
+  mostrarTecnicos = false;
+  cargandoTecnicos = false;
+
   editForm: FormGroup;
   formTecnico: FormGroup;
-  
+
   mostrarFormularioEdicion = false;
   mostrarFormularioTecnico = false;
   tecnicoEnEdicion: Tecnico | null = null;
-  
+
   guardando = false;
   guardandoTecnico = false;
   error: string | null = null;
@@ -33,8 +47,7 @@ export class DashboardTallerComponent implements OnInit {
 
   quickActions = [
     { icon: '📋', label: 'Asignaciones', action: 'assignments' },
-    { icon: '👨‍🔧', label: 'Mis Técnicos', action: 'technicians' },
-    { icon: '📈', label: 'Ganancias', action: 'earnings' },
+    { icon: '', label: 'Ganancias', action: 'earnings' },
   ];
 
   stats = [
@@ -46,6 +59,7 @@ export class DashboardTallerComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private tallerService: TallerService,
+    private asignacionesService: AsignacionesService,
     private router: Router,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef
@@ -61,23 +75,74 @@ export class DashboardTallerComponent implements OnInit {
     this.formTecnico = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      telefono: ['', [Validators.required]],
+      telefono: [''],
       password: ['', [Validators.required, Validators.minLength(8)]]
     });
   }
 
   ngOnInit(): void {
-    console.log('🔧 DashboardTallerComponent ngOnInit');
     this.cargarDatosTaller();
-    this.cargarTecnicos();
+    this.cargarSolicitudesPendientes();
+  }
+
+  cargarSolicitudesPendientes(): void {
+    console.log('[DashboardTaller] cargarSolicitudesPendientes → estado=pendiente', {
+      tipoAuth: localStorage.getItem('tipo'),
+      hasToken: !!localStorage.getItem('access_token')
+    });
+    this.cargandoSolicitudes = true;
+    this.errorSolicitudes = null;
+    this.asignacionesService.listar({ estado: 'pendiente' }).subscribe({
+      next: (data) => {
+        console.log('[DashboardTaller] cargarSolicitudesPendientes ← OK', { count: data.length, data });
+        this.solicitudesPendientes = data;
+        this.cdr.markForCheck(); // Forzar detección de cambios
+        this.cargandoSolicitudes = false;
+      },
+      error: (err) => {
+        console.error('[DashboardTaller] cargarSolicitudesPendientes ← ERROR', err);
+        this.errorSolicitudes = err?.error?.detail || err?.message || 'Error al cargar solicitudes';
+        this.cargandoSolicitudes = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  toggleInfoTaller(): void {
+    this.mostrarInfoTaller = !this.mostrarInfoTaller;
+    this.cdr.markForCheck();
+    if (this.mostrarInfoTaller && !this.taller) {
+      this.cargarDatosTaller();
+    }
+  }
+
+  toggleTecnicos(): void {
+    console.log('[DashboardTaller] toggleTecnicos →', { mostrarTecnicos: !this.mostrarTecnicos, tecnicosCount: this.tecnicos.length });
+    this.mostrarTecnicos = !this.mostrarTecnicos;
+    this.cdr.markForCheck();
+    if (this.mostrarTecnicos && this.tecnicos.length === 0) {
+      this.cargarTecnicos();
+    }
+  }
+
+  irASolicitud(asignacion: AsignacionTaller): void {
+    this.router.navigate(['/dashboard/taller/solicitudes', asignacion.id_asignacion]);
+  }
+
+  irATodasSolicitudes(): void {
+    this.router.navigate(['/dashboard/taller/solicitudes']);
+  }
+
+  etiquetaPrioridad(nivel?: string): string {
+    return nivel || 'sin prioridad';
   }
 
   cargarDatosTaller(): void {
-    console.log('📊 Cargando datos del taller...');
+    this.cargandoInfoTaller = true;
     this.tallerService.obtenerMiTaller().subscribe({
       next: (data) => {
-        console.log('✅ Datos del taller cargados:', data);
         this.taller = data;
+        this.disponible = data.disponible;
         this.editForm.patchValue({
           nombre: data.nombre,
           direccion: data.direccion,
@@ -85,28 +150,31 @@ export class DashboardTallerComponent implements OnInit {
           email: data.email,
           descripcion: data.descripcion
         });
+        this.cargandoInfoTaller = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
-        console.error('❌ Error al cargar datos del taller:', err);
-        this.error = 'Error al cargar datos del taller';
+        this.error = err.error?.detail || err.message || 'Error al cargar datos del taller';
+        this.cargandoInfoTaller = false;
+        this.cdr.markForCheck();
       }
     });
   }
 
   cargarTecnicos(): void {
-    console.log('👨‍🔧 Cargando técnicos...');
+    console.log('[DashboardTaller] cargarTecnicos →');
+    this.cargandoTecnicos = true;
     this.tallerService.obtenerTecnicos().subscribe({
       next: (data) => {
-        console.log('✅ Técnicos cargados:', data);
-        console.log('📊 Cantidad de técnicos:', data.length);
-        console.log('🔍 Estructura del primer técnico:', data[0]);
+        console.log('[DashboardTaller] cargarTecnicos ← OK', { count: data.length, tecnicos: data });
         this.tecnicos = [...data];
-        console.log('✨ this.tecnicos asignado:', this.tecnicos);
+        this.cargandoTecnicos = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('❌ Error al cargar técnicos:', err);
-        this.errorTecnico = 'Error al cargar técnicos';
+        console.error('[DashboardTaller] cargarTecnicos ← ERROR', err);
+        this.errorTecnico = err.error?.detail || err.message || 'Error al cargar técnicos';
+        this.cargandoTecnicos = false;
         this.cdr.detectChanges();
       }
     });
@@ -125,6 +193,7 @@ export class DashboardTallerComponent implements OnInit {
   }
 
   abrirFormularioTecnico(): void {
+    this.aplicarValidadoresTecnicoCreacion();
     this.mostrarFormularioTecnico = true;
     this.tecnicoEnEdicion = null;
     this.formTecnico.reset();
@@ -138,6 +207,21 @@ export class DashboardTallerComponent implements OnInit {
     this.errorTecnico = null;
     this.exitoTecnico = null;
     this.formTecnico.reset();
+    this.aplicarValidadoresTecnicoCreacion();
+  }
+
+  private aplicarValidadoresTecnicoCreacion(): void {
+    this.formTecnico.get('email')?.setValidators([Validators.required, Validators.email]);
+    this.formTecnico.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
+    this.formTecnico.get('email')?.updateValueAndValidity({ emitEvent: false });
+    this.formTecnico.get('password')?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private aplicarValidadoresTecnicoEdicion(): void {
+    this.formTecnico.get('email')?.setValidators([Validators.email]);
+    this.formTecnico.get('password')?.setValidators([Validators.minLength(8)]);
+    this.formTecnico.get('email')?.updateValueAndValidity({ emitEvent: false });
+    this.formTecnico.get('password')?.updateValueAndValidity({ emitEvent: false });
   }
 
   guardarCambios(): void {
@@ -178,12 +262,28 @@ export class DashboardTallerComponent implements OnInit {
     this.exitoTecnico = null;
 
     if (this.tecnicoEnEdicion) {
-      // Editar técnico existente
-      const { nombre, telefono } = this.formTecnico.value;
-      console.log('📝 Editando técnico:', this.tecnicoEnEdicion.id_tecnico);
-      this.tallerService.actualizarTecnico(this.tecnicoEnEdicion.id_tecnico, { nombre, telefono }).subscribe({
+      this.aplicarValidadoresTecnicoEdicion();
+      const valores = this.formTecnico.value;
+      const payload: TecnicoUpdate = {
+        nombre: String(valores.nombre ?? '').trim(),
+      };
+      const email = String(valores.email ?? '').trim();
+      const password = String(valores.password ?? '').trim();
+      const telefono = String(valores.telefono ?? '').trim();
+      if (email) {
+        payload.email = email;
+      }
+      if (password) {
+        payload.password = password;
+      }
+      if (telefono) {
+        payload.telefono = telefono;
+      }
+
+      console.log('📝 Editando técnico:', this.tecnicoEnEdicion.id_usuario_taller);
+      this.tallerService.actualizarTecnico(this.tecnicoEnEdicion.id_usuario_taller, payload).subscribe({
         next: (data) => {
-          const index = this.tecnicos.findIndex(t => t.id_tecnico === this.tecnicoEnEdicion?.id_tecnico);
+          const index = this.tecnicos.findIndex(t => t.id_usuario_taller === this.tecnicoEnEdicion?.id_usuario_taller);
           if (index !== -1) {
             this.tecnicos[index] = data;
           }
@@ -200,9 +300,19 @@ export class DashboardTallerComponent implements OnInit {
         }
       });
     } else {
-      // Agregar nuevo técnico
+      const valores = this.formTecnico.value;
+      const payload: TecnicoCreate = {
+        nombre: String(valores.nombre ?? '').trim(),
+        email: String(valores.email ?? '').trim(),
+        password: String(valores.password ?? '').trim(),
+      };
+      const telefono = String(valores.telefono ?? '').trim();
+      if (telefono) {
+        payload.telefono = telefono;
+      }
+
       console.log('➕ Agregando nuevo técnico');
-      this.tallerService.agregarTecnico(this.formTecnico.value).subscribe({
+      this.tallerService.agregarTecnico(payload).subscribe({
         next: (data) => {
           this.tecnicos.push(data);
           this.exitoTecnico = '✅ Técnico agregado correctamente';
@@ -222,15 +332,14 @@ export class DashboardTallerComponent implements OnInit {
 
   editarTecnico(tecnico: Tecnico): void {
     console.log('✏️ Editando técnico:', tecnico);
+    this.aplicarValidadoresTecnicoEdicion();
     this.tecnicoEnEdicion = tecnico;
     this.formTecnico.patchValue({
       nombre: tecnico.nombre,
-
+      email: tecnico.email,
       telefono: tecnico.telefono,
       password: ''
     });
-    this.formTecnico.get('password')?.clearValidators();
-    this.formTecnico.get('password')?.updateValueAndValidity();
     this.mostrarFormularioTecnico = true;
     this.errorTecnico = null;
     this.exitoTecnico = null;
@@ -238,11 +347,11 @@ export class DashboardTallerComponent implements OnInit {
 
   eliminarTecnico(tecnico: Tecnico): void {
     if (confirm(`¿Está seguro de que desea eliminar a ${tecnico.nombre}?`)) {
-      console.log('🗑️ Eliminando técnico:', tecnico.id_tecnico);
+      console.log('🗑️ Eliminando técnico:', tecnico.id_usuario_taller);
       this.guardandoTecnico = true;
-      this.tallerService.removerTecnico(tecnico.id_tecnico).subscribe({
+      this.tallerService.removerTecnico(tecnico.id_usuario_taller).subscribe({
         next: () => {
-          this.tecnicos = this.tecnicos.filter(t => t.id_tecnico !== tecnico.id_tecnico);
+          this.tecnicos = this.tecnicos.filter(t => t.id_usuario_taller !== tecnico.id_usuario_taller);
           this.exitoTecnico = '✅ Técnico eliminado correctamente';
           this.guardandoTecnico = false;
           setTimeout(() => {
@@ -259,10 +368,35 @@ export class DashboardTallerComponent implements OnInit {
 
   handleAction(action: string): void {
     if (action === 'technicians') {
-      // Scroll a la sección de técnicos
       const section = document.querySelector('.tecnicos-section');
       section?.scrollIntoView({ behavior: 'smooth' });
+    } else if (action === 'assignments') {
+      this.router.navigate(['/dashboard/taller/solicitudes']);
     }
+  }
+
+  /**
+   * NUEVO — B.3: Toggle disponibilidad del taller
+   */
+  toggleDisponibilidad(): void {
+    console.log('[DashboardTaller] toggleDisponibilidad →', { disponible: !this.disponible });
+    this.cambiandoDisponibilidad = true;
+
+    this.tallerService.toggleDisponibilidad(!this.disponible).subscribe({
+      next: (data) => {
+        console.log('[DashboardTaller] toggleDisponibilidad ← OK', { disponible: data.disponible });
+        this.disponible = data.disponible;
+        this.taller = data;
+        this.exito = this.disponible ? '✅ Taller activo - recibiendo solicitudes' : '🔒 Taller en pausa - no recibirá solicitudes';
+        this.cambiandoDisponibilidad = false;
+        setTimeout(() => this.exito = null, 3000);
+      },
+      error: (err) => {
+        console.error('[DashboardTaller] toggleDisponibilidad ← ERROR', err);
+        this.error = err?.error?.detail || err?.message || 'Error al cambiar disponibilidad';
+        this.cambiandoDisponibilidad = false;
+      }
+    });
   }
 
   logout(): void {

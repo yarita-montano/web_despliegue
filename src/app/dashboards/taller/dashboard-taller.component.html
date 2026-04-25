@@ -4,6 +4,24 @@
       <h1>🏢 Dashboard Taller</h1>
       <div class="header-info">
         <span class="user-name">{{ currentTaller?.nombre }}</span>
+        <!-- NUEVO — B.3: Toggle disponibilidad -->
+        <div class="disponibilidad-toggle">
+          <button
+            class="btn-toggle-disponibilidad"
+            [class.activo]="disponible"
+            [disabled]="cambiandoDisponibilidad"
+            (click)="toggleDisponibilidad()"
+            [title]="disponible ? 'Hacer pausa' : 'Reactivar'"
+          >
+            @if (cambiandoDisponibilidad) {
+              ⏳ Cambiando...
+            } @else if (disponible) {
+              ✅ Abierto
+            } @else {
+              🔒 En pausa
+            }
+          </button>
+        </div>
         <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>
       </div>
     </div>
@@ -12,7 +30,7 @@
   <main class="dashboard-main">
     <section class="welcome-section">
       <h2>Bienvenido/a, {{ currentTaller?.nombre }}!</h2>
-      <p>{{ taller?.nombre || 'Cargando...' }} - Gestiona tu taller y operaciones</p>
+      <p>Gestiona las solicitudes de asignación y tu taller</p>
     </section>
 
     @if (error) {
@@ -29,50 +47,117 @@
       </div>
     }
 
-    <section class="taller-info">
-      <div class="taller-card">
-        <h3>📍 Información del Taller</h3>
-        @if (taller) {
-          <div class="taller-details">
-            <div class="detail-row">
-              <span class="label">Nombre:</span>
-              <span class="value">{{ taller.nombre }}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Dirección:</span>
-              <span class="value">{{ taller.direccion }}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Teléfono:</span>
-              <span class="value">{{ taller.telefono }}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Email:</span>
-              <span class="value">{{ taller.email }}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Descripción:</span>
-              <span class="value">{{ taller.descripcion }}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Estado:</span>
-              <span class="value badge" [class.activo]="taller.activo">
-                {{ taller.activo ? 'Activo' : 'Inactivo' }}
-              </span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Verificado:</span>
-              <span class="value badge" [class.verificado]="taller.verificado">
-                {{ taller.verificado ? '✅ Verificado' : '⏳ Pendiente' }}
-              </span>
-            </div>
-          </div>
-          <button class="btn btn-primary" (click)="abrirFormularioEdicion()">✏️ Editar Datos</button>
-        } @else {
-          <p class="loading">Cargando información del taller...</p>
-        }
+    <section class="solicitudes-pendientes-section">
+      <div class="section-header">
+        <h3>📋 Solicitudes Pendientes</h3>
+        <div class="section-actions">
+          <button class="btn btn-secondary btn-small" (click)="cargarSolicitudesPendientes()" [disabled]="cargandoSolicitudes">
+            🔄 Refrescar
+          </button>
+          <button class="btn btn-primary btn-small" (click)="irATodasSolicitudes()">
+            Ver todas →
+          </button>
+        </div>
       </div>
+
+      @if (errorSolicitudes) {
+        <div class="alert alert-error">
+          <span (click)="errorSolicitudes = null" class="close-btn">&times;</span>
+          {{ errorSolicitudes }}
+        </div>
+      }
+
+      @if (cargandoSolicitudes) {
+        <p class="loading">Cargando solicitudes...</p>
+      } @else if (solicitudesPendientes.length === 0) {
+        <div class="empty-state-card">
+          <p>🎉 No tienes solicitudes pendientes</p>
+        </div>
+      } @else {
+        <div class="solicitudes-grid">
+          @for (s of solicitudesPendientes; track s.id_asignacion) {
+            <div class="solicitud-card" (click)="irASolicitud(s)">
+              <div class="solicitud-header">
+                <span class="badge-estado badge-pendiente">⏳ Pendiente</span>
+                @if (s.incidente.prioridad) {
+                  <span class="badge-prioridad prioridad-{{ s.incidente.prioridad.nivel }}">
+                    {{ etiquetaPrioridad(s.incidente.prioridad.nivel) }}
+                  </span>
+                }
+              </div>
+              <h4>{{ s.incidente.usuario.nombre }} • {{ s.incidente.vehiculo.placa }}</h4>
+              <p class="categoria">{{ s.incidente.categoria?.nombre || 'Sin categoría' }}</p>
+              <p class="resumen">{{ s.incidente.resumen_ia || s.incidente.descripcion_usuario || '-' }}</p>
+              <p class="fecha"><small>{{ s.incidente.created_at | date:'short' }}</small></p>
+            </div>
+          }
+        </div>
+      }
     </section>
+
+    <section class="info-toggle-section">
+      <button type="button" class="btn btn-primary" (click)="toggleInfoTaller()">
+        {{ mostrarInfoTaller ? '▲ Ocultar' : '▼ Ver' }} información del taller
+      </button>
+      <button type="button" class="btn btn-primary" (click)="toggleTecnicos()">
+        {{ mostrarTecnicos ? '▲ Ocultar' : '▼ Ver' }} mis técnicos
+      </button>
+    </section>
+
+    @if (mostrarInfoTaller) {
+      <section class="taller-info">
+        <div class="taller-card">
+          <h3>📍 Información del Taller</h3>
+          @if (cargandoInfoTaller) {
+            <p class="loading">Cargando información del taller...</p>
+          } @else if (taller) {
+            <div class="taller-details">
+              <div class="detail-row">
+                <span class="label">Nombre:</span>
+                <span class="value">{{ taller.nombre }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Dirección:</span>
+                <span class="value">{{ taller.direccion }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Teléfono:</span>
+                <span class="value">{{ taller.telefono }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Email:</span>
+                <span class="value">{{ taller.email }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Descripción:</span>
+                <span class="value">{{ taller.descripcion }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Estado:</span>
+                <span class="value badge" [class.activo]="taller.activo">
+                  {{ taller.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Disponibilidad:</span>
+                <span class="value badge" [class.activo]="taller.disponible">
+                  {{ taller.disponible ? '✅ Recibiendo solicitudes' : '🔒 En pausa' }}
+                </span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Verificado:</span>
+                <span class="value badge" [class.verificado]="taller.verificado">
+                  {{ taller.verificado ? '✅ Verificado' : '⏳ Pendiente' }}
+                </span>
+              </div>
+            </div>
+            <button class="btn btn-primary" (click)="abrirFormularioEdicion()">✏️ Editar Datos</button>
+          } @else {
+            <p class="empty-state">No se pudo cargar la información del taller</p>
+          }
+        </div>
+      </section>
+    }
 
     <!-- Modal de Edición -->
     @if (mostrarFormularioEdicion) {
@@ -192,6 +277,7 @@
     </section>
 
     <!-- Sección de Técnicos -->
+    @if (mostrarTecnicos) {
     <section class="tecnicos-section">
       <div class="tecnicos-card">
         <h3>👨‍🔧 Mis Técnicos</h3>
@@ -210,24 +296,27 @@
           </div>
         }
 
-        <!-- DEBUG: mostrar cantidad de técnicos -->
-        <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
-          Técnicos cargados: {{ tecnicos.length || 0 }}
-        </div>
-
-        @if (tecnicos && tecnicos.length > 0) {
+        @if (cargandoTecnicos) {
+          <p class="loading">Cargando técnicos...</p>
+        } @else if (tecnicos && tecnicos.length > 0) {
           <div class="tecnicos-list">
             <div class="list-header">
               <span class="col-nombre">Nombre</span>
-              <span class="col-email">Teléfono</span>
+              <span class="col-email">Email / Acceso app</span>
               <span class="col-telefono">Disponible</span>
               <span class="col-estado">Estado</span>
               <span class="col-acciones">Acciones</span>
             </div>
-            @for (tecnico of tecnicos; track tecnico.id_tecnico) {
+            @for (tecnico of tecnicos; track tecnico.id_usuario_taller) {
               <div class="list-row">
                 <span class="col-nombre">{{ tecnico.nombre }}</span>
-                <span class="col-email">{{ tecnico.telefono }}</span>
+                <span class="col-email">
+                  <small class="text-muted">{{ tecnico.email }}</small>
+                  <br />
+                  <small class="text-muted">{{ tecnico.telefono || '-' }}</small>
+                  <br />
+                  <small class="text-success">✓ Acceso app activo</small>
+                </span>
                 <span class="col-telefono">
                   <span class="badge" [class.activo]="tecnico.disponible">
                     {{ tecnico.disponible ? '✅ Disponible' : '❌ Ocupado' }}
@@ -265,7 +354,7 @@
           </p>
         }
 
-        <button 
+        <button
           type="button"
           class="btn btn-primary"
           (click)="abrirFormularioTecnico()"
@@ -275,6 +364,7 @@
         </button>
       </div>
     </section>
+    }
 
     <!-- Modal de Agregar/Editar Técnico -->
     @if (mostrarFormularioTecnico) {
@@ -310,44 +400,39 @@
                 class="form-control"
                 placeholder="+57 310555xxxx"
               />
-              @if (formTecnico.get('telefono')?.hasError('required') && formTecnico.get('telefono')?.touched) {
-                <span class="error">Teléfono es requerido</span>
+            </div>
+
+            <div class="form-group">
+              <label>Email {{ tecnicoEnEdicion ? '(opcional)' : '*' }}:</label>
+              <input 
+                type="email" 
+                formControlName="email" 
+                class="form-control"
+                placeholder="tecnico@email.com"
+              />
+              @if (!tecnicoEnEdicion && formTecnico.get('email')?.hasError('required') && formTecnico.get('email')?.touched) {
+                <span class="error">Email es requerido</span>
+              }
+              @if (formTecnico.get('email')?.hasError('email') && formTecnico.get('email')?.touched) {
+                <span class="error">Email inválido</span>
               }
             </div>
 
-            @if (!tecnicoEnEdicion) {
-              <div class="form-group">
-                <label>Email:</label>
-                <input 
-                  type="email" 
-                  formControlName="email" 
-                  class="form-control"
-                  placeholder="tecnico@email.com"
-                />
-                @if (formTecnico.get('email')?.hasError('required') && formTecnico.get('email')?.touched) {
-                  <span class="error">Email es requerido</span>
-                }
-                @if (formTecnico.get('email')?.hasError('email') && formTecnico.get('email')?.touched) {
-                  <span class="error">Email inválido</span>
-                }
-              </div>
-
-              <div class="form-group">
-                <label>Contraseña:</label>
-                <input 
-                  type="password" 
-                  formControlName="password" 
-                  class="form-control"
-                  placeholder="••••••••"
-                />
-                @if (formTecnico.get('password')?.hasError('required') && formTecnico.get('password')?.touched) {
-                  <span class="error">Contraseña es requerida</span>
-                }
-                @if (formTecnico.get('password')?.hasError('minlength') && formTecnico.get('password')?.touched) {
-                  <span class="error">Mínimo 8 caracteres</span>
-                }
-              </div>
-            }
+            <div class="form-group">
+              <label>Contraseña {{ tecnicoEnEdicion ? '(opcional)' : '*' }}:</label>
+              <input 
+                type="password" 
+                formControlName="password" 
+                class="form-control"
+                [placeholder]="tecnicoEnEdicion ? 'Dejar vacío para conservar' : '••••••••'"
+              />
+              @if (!tecnicoEnEdicion && formTecnico.get('password')?.hasError('required') && formTecnico.get('password')?.touched) {
+                <span class="error">Contraseña es requerida</span>
+              }
+              @if (formTecnico.get('password')?.hasError('minlength') && formTecnico.get('password')?.touched) {
+                <span class="error">Mínimo 8 caracteres</span>
+              }
+            </div>
 
             <div class="form-actions">
               <button 

@@ -1,0 +1,71 @@
+<div class="resenas-container">
+  <header class="resenas-header">
+    <button class="btn-back" (click)="volver()">← Volver</button>
+    <h1>⭐ Reseñas y Evaluaciones</h1>
+  </header>
+
+  @if (cargando) {
+    <div class="loading">Cargando reseñas...</div>
+  }
+
+  @if (error && !cargando) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
+
+  @if (!cargando && evaluaciones.length > 0) {
+    <section class="resumen-card">
+      <div class="resumen-stat">
+        <div class="promedio-estrella">
+          {{ promedio.toFixed(1) }} ⭐
+        </div>
+        <div class="resumen-texto">
+          <h2>Calificación Promedio</h2>
+          <p>{{ evaluaciones.length }} {{ evaluaciones.length === 1 ? 'reseña' : 'reseñas' }} recibidas</p>
+          <div class="estrellas-resumen">
+            {{ renderStars(Math.round(promedio)) }}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="resenas-lista">
+      <h2>Todas las Reseñas</h2>
+      @for (resena of evaluaciones; track resena.id_evaluacion; let i = $index) {
+        <div class="resena-card" [class]="'resena-card resena-' + getColorClase(resena.estrellas)">
+          <div class="resena-header">
+            <div class="estrellas" [title]="resena.estrellas + ' de 5 estrellas'">
+              {{ renderStars(resena.estrellas) }}
+            </div>
+            <div class="fecha">
+              {{ resena.created_at | date: 'dd MMM yyyy' }}
+            </div>
+          </div>
+
+          @if (resena.comentario) {
+            <div class="comentario">
+              "{{ resena.comentario }}"
+            </div>
+          }
+
+          <div class="resena-meta">
+            <small>Incidente #{{ resena.id_incidente }}</small>
+            @if (resena.id_tecnico) {
+              <small>Técnico #{{ resena.id_tecnico }}</small>
+            }
+          </div>
+        </div>
+      }
+    </section>
+  }
+
+  @if (!cargando && evaluaciones.length === 0) {
+    <div class="card info-vacio">
+      <div class="icono">📭</div>
+      <h2>Sin reseñas aún</h2>
+      <p>Cuando los clientes evalúen tus servicios, aparecerán aquí.</p>
+      <button class="btn btn-primary" (click)="cargarEvaluaciones()">
+        🔄 Refrescar
+      </button>
+    </div>
+  }
+</div>

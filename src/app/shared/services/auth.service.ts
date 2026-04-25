@@ -73,6 +73,7 @@ export class AuthService {
       .post<LoginTallerResponse>(`${this.baseUrl}/talleres/login`, { email, password })
       .pipe(
         tap(res => {
+          console.log('[AuthService] loginTaller ← OK', { id_taller: res.taller?.id_taller });
           localStorage.setItem('access_token', res.access_token);
           localStorage.setItem('tipo', 'taller');
           localStorage.setItem('taller_data', JSON.stringify(res.taller));
@@ -89,6 +90,7 @@ export class AuthService {
       .post<LoginAdminResponse>(`${this.baseUrl}/usuarios/login`, { email, password })
       .pipe(
         tap(res => {
+          console.log('[AuthService] loginAdmin ← OK', { id_usuario: res.usuario?.id_usuario });
           localStorage.setItem('access_token', res.access_token);
           localStorage.setItem('tipo', 'usuario');
           localStorage.setItem('user_data', JSON.stringify(res.usuario));
@@ -101,6 +103,7 @@ export class AuthService {
   }
 
   logout(): void {
+    console.log('[AuthService] logout');
     localStorage.removeItem('access_token');
     localStorage.removeItem('tipo');
     localStorage.removeItem('user_data');

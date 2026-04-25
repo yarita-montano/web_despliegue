@@ -1,0 +1,283 @@
+<div class="detalle-container">
+  <header class="detalle-header">
+    <button class="btn-back" (click)="volver()">← Volver</button>
+    <h1>
+      @if (asignacion()) {
+        Solicitud #{{ asignacion()?.id_asignacion }}
+      } @else {
+        Cargando...
+      }
+    </h1>
+  </header>
+
+  @if (cargando()) {
+    <div class="loading">Cargando detalle...</div>
+  }
+
+  @if (error() && !mostrarModalAceptar() && !mostrarModalRechazar()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+
+  @if (exito()) {
+    <div class="alert alert-success">{{ exito() }}</div>
+  }
+
+  @if (asignacion(); as a) {
+    <section class="card estado-card">
+      <div class="estado-header">
+        <h3>Estado de la solicitud</h3>
+        <span class="badge badge-{{ a.estado.nombre }}">
+          {{ etiquetaEstado(a.estado.nombre) }}
+        </span>
+      </div>
+      @if (a.eta_minutos) {
+        <p><strong>ETA:</strong> {{ a.eta_minutos }} minutos</p>
+      }
+      @if (a.nota_taller) {
+        <p><strong>Nota del taller:</strong> {{ a.nota_taller }}</p>
+      }
+      <p class="meta">
+        <small>Creada: {{ a.created_at | date:'medium' }}</small>
+      </p>
+    </section>
+
+    <section class="card">
+      <h3>👤 Cliente</h3>
+      <div class="row">
+        <span class="label">Nombre:</span>
+        <span class="value">{{ a.incidente.usuario.nombre }}</span>
+      </div>
+      <div class="row">
+        <span class="label">Teléfono:</span>
+        <span class="value">
+          @if (a.incidente.usuario.telefono) {
+            <a href="tel:{{ a.incidente.usuario.telefono }}">
+              {{ a.incidente.usuario.telefono }}
+            </a>
+            <button class="btn-mini" (click)="llamarCliente()">📞 Llamar</button>
+          } @else { - }
+        </span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>🚗 Vehículo</h3>
+      <div class="row">
+        <span class="label">Placa:</span>
+        <span class="value">{{ a.incidente.vehiculo.placa }}</span>
+      </div>
+      <div class="row">
+        <span class="label">Marca/Modelo:</span>
+        <span class="value">
+          {{ a.incidente.vehiculo.marca || '-' }} {{ a.incidente.vehiculo.modelo || '' }}
+        </span>
+      </div>
+      <div class="row">
+        <span class="label">Año:</span>
+        <span class="value">{{ a.incidente.vehiculo.anio || '-' }}</span>
+      </div>
+      <div class="row">
+        <span class="label">Color:</span>
+        <span class="value">{{ a.incidente.vehiculo.color || '-' }}</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>⚠️ Problema</h3>
+      <div class="row">
+        <span class="label">Categoría:</span>
+        <span class="value">{{ a.incidente.categoria?.nombre || '-' }}</span>
+      </div>
+      <div class="row">
+        <span class="label">Prioridad:</span>
+        <span class="value">
+          @if (a.incidente.prioridad) {
+            <span class="badge badge-prioridad prioridad-{{ a.incidente.prioridad.nivel }}">
+              {{ a.incidente.prioridad.nivel }}
+            </span>
+          } @else { - }
+        </span>
+      </div>
+      <div class="row column">
+        <span class="label">Descripción del cliente:</span>
+        <span class="value">{{ a.incidente.descripcion_usuario || '-' }}</span>
+      </div>
+      <div class="row column">
+        <span class="label">Resumen IA:</span>
+        <span class="value">{{ a.incidente.resumen_ia || '-' }}</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>📍 Ubicación</h3>
+      <p>{{ a.incidente.latitud }}, {{ a.incidente.longitud }}</p>
+      <div class="location-actions">
+        <button class="btn btn-secondary" (click)="toggleMapa()">
+          {{ mostrarMapa() ? '🗺️ Ocultar Mapa' : '🗺️ Ver Mapa' }}
+        </button>
+        <button class="btn btn-secondary" (click)="abrirGoogleMaps()">
+          🔗 Abrir en Google Maps
+        </button>
+      </div>
+      @if (mostrarMapa()) {
+        <div class="map-container">
+          <div #mapContainer class="map"></div>
+        </div>
+      }
+    </section>
+
+    @if (a.estado.nombre === 'pendiente') {
+      <section class="acciones">
+        <button
+          class="btn btn-success"
+          [disabled]="procesando()"
+          (click)="abrirModalAceptar()"
+        >
+          ✅ ACEPTAR
+        </button>
+        <button
+          class="btn btn-danger"
+          [disabled]="procesando()"
+          (click)="abrirModalRechazar()"
+        >
+          ❌ RECHAZAR
+        </button>
+      </section>
+    } @else {
+      <section class="card info-estado">
+        <p>Esta solicitud está en estado <strong>{{ etiquetaEstado(a.estado.nombre) }}</strong>. En la web del taller solo puedes gestionar solicitudes pendientes.</p>
+      </section>
+    }
+  }
+
+  @if (mostrarModalAceptar()) {
+    <div class="modal-overlay" (click)="cerrarModales()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>✅ Aceptar Solicitud</h2>
+          <button class="close-btn" (click)="cerrarModales()">&times;</button>
+        </div>
+
+        @if (error()) {
+          <div class="alert alert-error">{{ error() }}</div>
+        }
+
+        <form [formGroup]="formAceptar" class="modal-form">
+          <div class="form-group">
+            <label>Técnico asignado *</label>
+            @if (cargandoTecnicos()) {
+              <p class="loading">Cargando técnicos disponibles...</p>
+            } @else if (tecnicos().length === 0) {
+              <p class="error">
+                No tienes técnicos disponibles. Asegúrate de tener al menos un técnico activo y sin asignaciones en curso.
+              </p>
+            } @else {
+              <select formControlName="id_usuario">
+                <option [ngValue]="null">-- Selecciona un técnico --</option>
+                @for (t of tecnicos(); track t.id_usuario_taller) {
+                  <option [ngValue]="t.id_usuario">
+                    {{ t.nombre }} ({{ t.telefono }})
+                  </option>
+                }
+              </select>
+              @if (formAceptar.get('id_usuario')?.hasError('required') && formAceptar.get('id_usuario')?.touched) {
+                <span class="error">Debes seleccionar un técnico</span>
+              }
+            }
+          </div>
+
+          <div class="form-group">
+            <label>ETA (minutos) *</label>
+            <input type="number" formControlName="eta_minutos" min="1" max="600" />
+            @if (formAceptar.get('eta_minutos')?.hasError('required') && formAceptar.get('eta_minutos')?.touched) {
+              <span class="error">El ETA es requerido</span>
+            }
+            @if (formAceptar.get('eta_minutos')?.hasError('min') || formAceptar.get('eta_minutos')?.hasError('max')) {
+              <span class="error">Debe estar entre 1 y 600 minutos</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Nota al cliente (opcional)</label>
+            <textarea
+              formControlName="nota"
+              rows="3"
+              placeholder="Ej: Vamos en camino, llevamos repuesto"
+            ></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="cerrarModales()"
+              [disabled]="procesando()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-success"
+              [disabled]="formAceptar.invalid || procesando()"
+              (click)="confirmarAceptar()"
+            >
+              @if (procesando()) { Enviando... } @else { Confirmar }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  @if (mostrarModalRechazar()) {
+    <div class="modal-overlay" (click)="cerrarModales()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>❌ Rechazar Solicitud</h2>
+          <button class="close-btn" (click)="cerrarModales()">&times;</button>
+        </div>
+
+        @if (error()) {
+          <div class="alert alert-error">{{ error() }}</div>
+        }
+
+        <form [formGroup]="formRechazar" class="modal-form">
+          <div class="form-group">
+            <label>Motivo del rechazo * (mínimo 3 caracteres)</label>
+            <textarea
+              formControlName="motivo"
+              rows="4"
+              placeholder="Ej: Sin stock de la pieza requerida"
+            ></textarea>
+            @if (formRechazar.get('motivo')?.hasError('required') && formRechazar.get('motivo')?.touched) {
+              <span class="error">El motivo es requerido</span>
+            }
+            @if (formRechazar.get('motivo')?.hasError('minlength') && formRechazar.get('motivo')?.touched) {
+              <span class="error">Mínimo 3 caracteres</span>
+            }
+          </div>
+
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="cerrarModales()"
+              [disabled]="procesando()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              [disabled]="formRechazar.invalid || procesando()"
+              (click)="confirmarRechazar()"
+            >
+              @if (procesando()) { Enviando... } @else { Confirmar Rechazo }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+</div>
