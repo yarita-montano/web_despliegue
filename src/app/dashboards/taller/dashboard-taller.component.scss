@@ -973,6 +973,171 @@
   }
 }
 
+// ===== NOTIFICATION BELL =====
+
+.notif-wrapper {
+  position: relative;
+
+  .btn-notif {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+    position: relative;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+  }
+
+  .notif-badge {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    background: #ff4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    line-height: 1;
+  }
+
+  .notif-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 320px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 500;
+    border: 1px solid #e8e8e8;
+    animation: slideDown 0.2s ease-out;
+
+    h4 {
+      margin: 0;
+      padding: 14px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #333;
+      border-bottom: 1px solid #eee;
+      background: #fafafa;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .notif-empty {
+      padding: 24px;
+      text-align: center;
+      color: #aaa;
+      font-size: 13px;
+      margin: 0;
+    }
+
+    .notif-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: background 0.15s;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background: #f5f9ff;
+      }
+
+      &.no-leida {
+        background: #f0f7ff;
+        border-left: 3px solid #4facfe;
+
+        &:hover {
+          background: #e8f0ff;
+        }
+      }
+
+      strong {
+        display: block;
+        font-size: 13px;
+        color: #222;
+        margin-bottom: 4px;
+      }
+
+      p {
+        margin: 0 0 4px 0;
+        font-size: 12px;
+        color: #555;
+        line-height: 1.4;
+      }
+
+      small {
+        font-size: 11px;
+        color: #aaa;
+      }
+    }
+  }
+}
+
+// ===== NAV BUTTON =====
+
+.btn-nav {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+  }
+}
+
+// ===== MENSAJES BUTTON IN SOLICITUD CARD =====
+
+.solicitud-card {
+  .btn-mensajes {
+    margin-top: 12px;
+    width: 100%;
+    padding: 8px 0;
+    background: linear-gradient(135deg, #1565c0 0%, #1e88e5 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 2px 6px rgba(30, 136, 229, 0.25);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 14px rgba(30, 136, 229, 0.35);
+      background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
 // ===== INFO TOGGLE SECTION =====
 
 .info-toggle-section {

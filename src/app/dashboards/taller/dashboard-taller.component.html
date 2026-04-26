@@ -22,6 +22,32 @@
             }
           </button>
         </div>
+        <!-- Campana de notificaciones -->
+        <div class="notif-wrapper">
+          <button class="btn-notif" (click)="toggleNotificaciones()" title="Notificaciones">
+            🔔
+            @if (notificacionesNoLeidas > 0) {
+              <span class="notif-badge">{{ notificacionesNoLeidas }}</span>
+            }
+          </button>
+          @if (mostrarNotificaciones) {
+            <div class="notif-panel">
+              <h4>Notificaciones</h4>
+              @if (notificaciones.length === 0) {
+                <p class="notif-empty">Sin notificaciones</p>
+              }
+              @for (n of notificaciones; track n.id_notificacion) {
+                <div class="notif-item" [class.no-leida]="!n.leido" (click)="marcarLeida(n.id_notificacion)">
+                  <strong>{{ n.titulo }}</strong>
+                  <p>{{ n.mensaje }}</p>
+                  <small>{{ n.created_at | date:'dd/MM HH:mm' }}</small>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <!-- Accesos rápidos de navegación -->
+        <button class="btn-nav" (click)="irAHistorial()">📜 Historial</button>
         <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>
       </div>
     </div>
@@ -89,6 +115,13 @@
               <p class="categoria">{{ s.incidente.categoria?.nombre || 'Sin categoría' }}</p>
               <p class="resumen">{{ s.incidente.resumen_ia || s.incidente.descripcion_usuario || '-' }}</p>
               <p class="fecha"><small>{{ s.incidente.created_at | date:'short' }}</small></p>
+              <button
+                class="btn-mensajes"
+                (click)="$event.stopPropagation(); irAMensajes(s.incidente.id_incidente)"
+                title="Abrir chat con el cliente"
+              >
+                💬 Mensajes
+              </button>
             </div>
           }
         </div>

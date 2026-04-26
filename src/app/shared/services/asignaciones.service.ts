@@ -48,6 +48,36 @@ export class AsignacionesService {
     );
   }
 
+  historial(filtros?: { pagina?: number; porPagina?: number; desde?: string; hasta?: string }): Observable<AsignacionTaller[]> {
+    const params: string[] = [];
+
+    if (filtros?.pagina) params.push(`pagina=${filtros.pagina}`);
+    if (filtros?.porPagina) params.push(`por_pagina=${filtros.porPagina}`);
+    if (filtros?.desde) params.push(`desde=${filtros.desde}`);
+    if (filtros?.hasta) params.push(`hasta=${filtros.hasta}`);
+
+    const query = params.length > 0 ? `?${params.join('&')}` : '';
+    const url = `/talleres/mi-taller/historial${query}`;
+    console.log('[AsignacionesService] historial →', { filtros, url });
+
+    return this.http.get<AsignacionTaller[]>(url).pipe(
+      tap(data => {
+        console.log('[AsignacionesService] historial ← OK', {
+          count: data?.length ?? 0,
+          ids: data?.map(d => d.id_asignacion) ?? []
+        });
+      }),
+      catchError(err => {
+        console.error('[AsignacionesService] historial ← ERROR', {
+          status: err?.status,
+          message: err?.message,
+          detail: err?.error?.detail
+        });
+        return throwError(() => err);
+      })
+    );
+  }
+
   obtener(idAsignacion: number): Observable<AsignacionTaller> {
     const url = `/talleres/mi-taller/asignaciones/${idAsignacion}`;
     console.log('[AsignacionesService] obtener →', { idAsignacion, url });

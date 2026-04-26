@@ -5,6 +5,8 @@ import { DashboardAdminComponent } from './dashboards/admin/dashboard-admin.comp
 import { SolicitudesComponent } from './dashboards/taller/solicitudes/solicitudes.component';
 import { SolicitudDetalleComponent } from './dashboards/taller/solicitud-detalle/solicitud-detalle.component';
 import { ResenasComponent } from './dashboards/taller/resenas/resenas.component';
+import { HistorialComponent } from './dashboards/taller/historial/historial.component';
+import { MensajesComponent } from './dashboards/taller/mensajes/mensajes.component';
 import { UnauthorizedComponent } from './shared/pages/unauthorized.component';
 import { authGuard, tipoGuard, adminGuard, publicGuard } from './shared/guards/auth.guard';
 
@@ -30,7 +32,9 @@ export const routes: Routes = [
           { path: '', component: DashboardTallerComponent },
           { path: 'solicitudes', component: SolicitudesComponent },
           { path: 'solicitudes/:id', component: SolicitudDetalleComponent },
-          { path: 'resenas', component: ResenasComponent }
+          { path: 'resenas', component: ResenasComponent },
+          { path: 'historial', component: HistorialComponent },
+          { path: 'mensajes/:idIncidente', component: MensajesComponent },
         ]
       },
       {

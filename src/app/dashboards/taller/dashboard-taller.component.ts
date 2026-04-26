@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,6 +6,16 @@ import { AuthService, TallerAuth } from '../../shared/services/auth.service';
 import { TallerService, Taller, Tecnico, TecnicoCreate, TecnicoUpdate } from '../../shared/services/taller.service';
 import { AsignacionesService } from '../../shared/services/asignaciones.service';
 import { AsignacionTaller } from '../../shared/models/asignacion.model';
+import { EvaluacionResponse } from '../../shared/models/evaluacion.model';
+import { NotificacionService, Notificacion } from '../../shared/services/notificacion.service';
+import { Subscription, forkJoin, interval, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
+
+interface DashboardStat {
+  label: string;
+  value: string;
+  icon: string;
+}
 
 @Component({
   selector: 'app-dashboard-taller',
@@ -14,7 +24,7 @@ import { AsignacionTaller } from '../../shared/models/asignacion.model';
   templateUrl: './dashboard-taller.component.html',
   styleUrl: './dashboard-taller.component.scss'
 })
-export class DashboardTallerComponent implements OnInit {
+export class DashboardTallerComponent implements OnInit, OnDestroy {
   currentTaller: TallerAuth | null = null;
   taller: Taller | null = null;
   tecnicos: Tecnico[] = [];
@@ -44,22 +54,31 @@ export class DashboardTallerComponent implements OnInit {
   errorTecnico: string | null = null;
   exito: string | null = null;
   exitoTecnico: string | null = null;
+  cargandoResumen = false;
+
+  notificaciones: Notificacion[] = [];
+  notificacionesNoLeidas = 0;
+  mostrarNotificaciones = false;
+  private _notifSub?: Subscription;
 
   quickActions = [
     { icon: '📋', label: 'Asignaciones', action: 'assignments' },
-    { icon: '', label: 'Ganancias', action: 'earnings' },
+    { icon: '📜', label: 'Historial', action: 'historial' },
   ];
 
-  stats = [
-    { label: 'Trabajos Completados', value: '42', icon: '✅' },
-    { label: 'Trabajos en Progreso', value: '8', icon: '⏳' },
-    { label: 'Ingresos este Mes', value: '$1,250', icon: '💰' },
+  stats: DashboardStat[] = [
+    { label: 'Solicitudes pendientes', value: '—', icon: '📋' },
+    { label: 'Trabajos activos', value: '—', icon: '⏳' },
+    { label: 'Completadas este mes', value: '—', icon: '✅' },
+    { label: 'Técnicos disponibles', value: '—', icon: '👨‍🔧' },
+    { label: 'Promedio reseñas', value: '—', icon: '⭐' },
   ];
 
   constructor(
     private authService: AuthService,
     private tallerService: TallerService,
     private asignacionesService: AsignacionesService,
+    private notifService: NotificacionService,
     private router: Router,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef
@@ -82,7 +101,52 @@ export class DashboardTallerComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarDatosTaller();
-    this.cargarSolicitudesPendientes();
+    this.cargarResumenDashboard();
+    this.cargarNotificaciones();
+    this.notifService.initFirebase();
+    // Poll notificaciones cada 30s
+    this._notifSub = interval(30_000)
+      .pipe(switchMap(() => this.notifService.getMisNotificaciones()))
+      .subscribe(data => {
+        this.notificaciones = data;
+        this.notificacionesNoLeidas = data.filter(n => !n.leido).length;
+        this.cdr.markForCheck();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this._notifSub?.unsubscribe();
+  }
+
+  cargarNotificaciones(): void {
+    this.notifService.getMisNotificaciones().subscribe({
+      next: (data) => {
+        this.notificaciones = data;
+        this.notificacionesNoLeidas = data.filter(n => !n.leido).length;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  toggleNotificaciones(): void {
+    this.mostrarNotificaciones = !this.mostrarNotificaciones;
+  }
+
+  marcarLeida(id: number): void {
+    this.notifService.marcarLeida(id).subscribe(() => {
+      const n = this.notificaciones.find(x => x.id_notificacion === id);
+      if (n) n.leido = true;
+      this.notificacionesNoLeidas = this.notificaciones.filter(x => !x.leido).length;
+      this.cdr.markForCheck();
+    });
+  }
+
+  irAHistorial(): void {
+    this.router.navigate(['/dashboard/taller/historial']);
+  }
+
+  irAMensajes(idIncidente: number): void {
+    this.router.navigate(['/dashboard/taller/mensajes', idIncidente]);
   }
 
   cargarSolicitudesPendientes(): void {
@@ -103,6 +167,56 @@ export class DashboardTallerComponent implements OnInit {
         console.error('[DashboardTaller] cargarSolicitudesPendientes ← ERROR', err);
         this.errorSolicitudes = err?.error?.detail || err?.message || 'Error al cargar solicitudes';
         this.cargandoSolicitudes = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  cargarResumenDashboard(): void {
+    console.log('[DashboardTaller] cargarResumenDashboard →');
+    this.cargandoResumen = true;
+    this.cargandoSolicitudes = true;
+    this.cargandoTecnicos = true;
+
+    const inicioMes = this.inicioDelMes();
+    const hoy = this.fechaDeHoy();
+
+    forkJoin({
+      pendientes: this.asignacionesService.listar({ estado: 'pendiente' }).pipe(catchError(() => of([] as AsignacionTaller[]))),
+      aceptadas: this.asignacionesService.listar({ estado: 'aceptada' }).pipe(catchError(() => of([] as AsignacionTaller[]))),
+      enCamino: this.asignacionesService.listar({ estado: 'en_camino' }).pipe(catchError(() => of([] as AsignacionTaller[]))),
+      historialMes: this.asignacionesService.historial({ pagina: 1, porPagina: 100, desde: inicioMes, hasta: hoy }).pipe(catchError(() => of([] as AsignacionTaller[]))),
+      tecnicos: this.tallerService.obtenerTecnicos().pipe(catchError(() => of([] as Tecnico[]))),
+      evaluaciones: this.tallerService.obtenerEvaluaciones().pipe(catchError(() => of([] as EvaluacionResponse[]))),
+    }).subscribe({
+      next: ({ pendientes, aceptadas, enCamino, historialMes, tecnicos, evaluaciones }) => {
+        this.solicitudesPendientes = pendientes;
+        this.tecnicos = tecnicos;
+
+        const tecnicosDisponibles = tecnicos.filter(t => t.activo && t.disponible).length;
+        const promedioResenas = evaluaciones.length
+          ? (evaluaciones.reduce((sum, e) => sum + e.estrellas, 0) / evaluaciones.length).toFixed(1)
+          : '—';
+
+        this.stats = [
+          { label: 'Solicitudes pendientes', value: String(pendientes.length), icon: '📋' },
+          { label: 'Trabajos activos', value: String(aceptadas.length + enCamino.length), icon: '⏳' },
+          { label: 'Completadas este mes', value: String(historialMes.length), icon: '✅' },
+          { label: 'Técnicos disponibles', value: String(tecnicosDisponibles), icon: '👨‍🔧' },
+          { label: 'Promedio reseñas', value: promedioResenas === '—' ? '—' : `${promedioResenas}/5`, icon: '⭐' },
+        ];
+
+        this.cargandoResumen = false;
+        this.cargandoSolicitudes = false;
+        this.cargandoTecnicos = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('[DashboardTaller] cargarResumenDashboard ← ERROR', err);
+        this.error = err?.error?.detail || err?.message || 'Error al cargar métricas del dashboard';
+        this.cargandoResumen = false;
+        this.cargandoSolicitudes = false;
+        this.cargandoTecnicos = false;
         this.cdr.markForCheck();
       }
     });
@@ -142,6 +256,13 @@ export class DashboardTallerComponent implements OnInit {
     this.tallerService.obtenerMiTaller().subscribe({
       next: (data) => {
         this.taller = data;
+        this.currentTaller = {
+          ...(this.currentTaller ?? {} as TallerAuth),
+          nombre: data.nombre,
+          email: data.email,
+          telefono: data.telefono ?? '',
+          direccion: data.direccion ?? '',
+        } as TallerAuth;
         this.disponible = data.disponible;
         this.editForm.patchValue({
           nombre: data.nombre,
@@ -237,6 +358,13 @@ export class DashboardTallerComponent implements OnInit {
     this.tallerService.actualizarMiTaller(this.editForm.value).subscribe({
       next: (data) => {
         this.taller = data;
+        this.currentTaller = {
+          ...(this.currentTaller ?? {} as TallerAuth),
+          nombre: data.nombre,
+          email: data.email,
+          telefono: data.telefono ?? '',
+          direccion: data.direccion ?? '',
+        } as TallerAuth;
         this.exito = '✅ Datos del taller actualizados correctamente';
         this.guardando = false;
         setTimeout(() => {
@@ -372,6 +500,8 @@ export class DashboardTallerComponent implements OnInit {
       section?.scrollIntoView({ behavior: 'smooth' });
     } else if (action === 'assignments') {
       this.router.navigate(['/dashboard/taller/solicitudes']);
+    } else if (action === 'historial') {
+      this.router.navigate(['/dashboard/taller/historial']);
     }
   }
 
@@ -387,6 +517,13 @@ export class DashboardTallerComponent implements OnInit {
         console.log('[DashboardTaller] toggleDisponibilidad ← OK', { disponible: data.disponible });
         this.disponible = data.disponible;
         this.taller = data;
+        this.currentTaller = {
+          ...(this.currentTaller ?? {} as TallerAuth),
+          nombre: data.nombre,
+          email: data.email,
+          telefono: data.telefono ?? '',
+          direccion: data.direccion ?? '',
+        } as TallerAuth;
         this.exito = this.disponible ? '✅ Taller activo - recibiendo solicitudes' : '🔒 Taller en pausa - no recibirá solicitudes';
         this.cambiandoDisponibilidad = false;
         setTimeout(() => this.exito = null, 3000);
@@ -402,5 +539,15 @@ export class DashboardTallerComponent implements OnInit {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  private inicioDelMes(): string {
+    const date = new Date();
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
+  }
+
+  private fechaDeHoy(): string {
+    const date = new Date();
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   }
 }

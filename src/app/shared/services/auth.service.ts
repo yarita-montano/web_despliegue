@@ -57,6 +57,13 @@ export class AuthService {
   private checkExistingToken(): void {
     const token = this.getToken();
     if (!token) return;
+
+    // Si el JWT está expirado, limpiar sesión local para evitar 401 al primer request.
+    if (this.isTokenExpired(token)) {
+      this.logout();
+      return;
+    }
+
     this.isAuthenticated$.next(true);
     const tipo = this.getTipo();
     if (tipo === 'taller') {
@@ -162,5 +169,21 @@ export class AuthService {
   private getStoredTaller(): TallerAuth | null {
     const s = localStorage.getItem('taller_data');
     return s ? JSON.parse(s) : null;
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const parts = token.split('.');
+      if (parts.length < 2) return true;
+
+      const payload = JSON.parse(atob(parts[1]));
+      const exp = Number(payload?.exp);
+      if (!Number.isFinite(exp)) return true;
+
+      const now = Math.floor(Date.now() / 1000);
+      return exp <= now;
+    } catch {
+      return true;
+    }
   }
 }

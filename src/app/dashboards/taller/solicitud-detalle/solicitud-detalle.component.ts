@@ -211,6 +211,10 @@ export class SolicitudDetalleComponent implements OnInit, OnDestroy, AfterViewIn
   toggleMapa(): void {
     this.mostrarMapa.set(!this.mostrarMapa());
     if (this.mostrarMapa() && !this.map) {
+      // Cargar técnicos si aún no están cargados (para mostrar ubicación del técnico asignado)
+      if (this.tecnicos().length === 0) {
+        this.cargarTecnicos();
+      }
       setTimeout(() => this.inicializarMapa(), 100);
     }
   }
@@ -221,11 +225,12 @@ export class SolicitudDetalleComponent implements OnInit, OnDestroy, AfterViewIn
     const asig = this.asignacion();
     if (!asig) return;
 
-    const { latitud, longitud } = asig.incidente;
+    const clienteLat = asig.incidente.latitud;
+    const clienteLng = asig.incidente.longitud;
     const container = this.mapContainer.nativeElement;
 
-    // Crear el mapa
-    this.map = L.map(container).setView([latitud, longitud], 15);
+    // Crear el mapa (centrado en el cliente)
+    this.map = L.map(container).setView([clienteLat, clienteLng], 15);
 
     // Agregar capa de OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -234,15 +239,70 @@ export class SolicitudDetalleComponent implements OnInit, OnDestroy, AfterViewIn
       minZoom: 1
     }).addTo(this.map);
 
-    // Agregar marcador en la ubicación
-    L.marker([latitud, longitud], {
-      title: asig.incidente.usuario.nombre
-    }).addTo(this.map).bindPopup(`
-      <div class="map-popup">
-        <strong>${asig.incidente.usuario.nombre}</strong><br/>
-        ${asig.incidente.latitud}, ${asig.incidente.longitud}
-      </div>
-    `).openPopup();
+    // ============ MARCADOR 1: CLIENTE (Ubicación del incidente) ============
+    const iconCliente = L.icon({
+      iconUrl: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red"><path d="M12 0C7.03 0 3 4.03 3 9c0 5.25 9 15 9 15s9-9.75 9-15c0-4.97-4.03-9-9-9zm0 12c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
+    });
+
+    L.marker([clienteLat, clienteLng], {
+      icon: iconCliente,
+      title: `Cliente: ${asig.incidente.usuario.nombre}`
+    })
+      .addTo(this.map)
+      .bindPopup(`
+        <div class="map-popup">
+          <strong style="color: red;">📍 CLIENTE</strong><br/>
+          <strong>${asig.incidente.usuario.nombre}</strong><br/>
+          ${clienteLat.toFixed(4)}, ${clienteLng.toFixed(4)}<br/>
+          <small>Ubicación del incidente</small>
+        </div>
+      `);
+
+    // ============ MARCADOR 2: TÉCNICO (Ubicación actual, si está asignado) ============
+    if (asig.id_usuario) {
+      // TODO: Obtener ubicación del técnico del backend
+      // Por ahora, intentamos obtener datos del técnico asignado
+      const tecnicoAsignado = this.tecnicos().find(t => t.id_usuario === asig.id_usuario);
+      
+      if (tecnicoAsignado && tecnicoAsignado.latitud != null && tecnicoAsignado.longitud != null) {
+        const tecnicoLat = tecnicoAsignado.latitud;
+        const tecnicoLng = tecnicoAsignado.longitud;
+
+        const iconTecnico = L.icon({
+          iconUrl: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="orange"><path d="M12 0C7.03 0 3 4.03 3 9c0 5.25 9 15 9 15s9-9.75 9-15c0-4.97-4.03-9-9-9zm0 12c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>',
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -32]
+        });
+
+        L.marker([tecnicoLat, tecnicoLng], {
+          icon: iconTecnico,
+          title: `Técnico: ${tecnicoAsignado.nombre}`
+        })
+          .addTo(this.map)
+          .bindPopup(`
+            <div class="map-popup">
+              <strong style="color: orange;">🔧 TÉCNICO</strong><br/>
+              <strong>${tecnicoAsignado.nombre}</strong><br/>
+              ${tecnicoLat.toFixed(4)}, ${tecnicoLng.toFixed(4)}<br/>
+              <small>Ubicación actual</small>
+            </div>
+          `);
+
+        // Ajustar zoom para que se vean ambos marcadores
+        const group = new L.FeatureGroup([
+          L.marker([clienteLat, clienteLng]),
+          L.marker([tecnicoLat, tecnicoLng])
+        ]);
+        this.map.fitBounds(group.getBounds().pad(0.1), { padding: [50, 50] });
+      } else {
+        // Solo mapa del cliente si el técnico no tiene ubicación
+        console.log('[SolicitudDetalle] Técnico asignado sin ubicación disponible');
+      }
+    }
 
     // Invalidar el tamaño del mapa (necesario después de mostrar)
     this.map.invalidateSize();
