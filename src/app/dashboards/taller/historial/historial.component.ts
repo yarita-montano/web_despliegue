@@ -53,12 +53,12 @@ import { finalize } from 'rxjs/operators';
             <tr *ngFor="let a of atenciones">
               <td>{{ a.id_asignacion }}</td>
               <td>{{ a.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td>{{ a.incidente?.usuario?.nombre ?? '—' }}</td>
+              <td>{{ a.incidente.usuario.nombre ?? '—' }}</td>
               <td>{{ vehiculoLabel(a) }}</td>
-              <td>{{ a.incidente?.categoria?.nombre ?? '—' }}</td>
+              <td>{{ a.incidente.categoria.nombre ?? '—' }}</td>
               <td>{{ a.id_usuario ?? '—' }}</td>
               <td>
-                <span class="badge completada">{{ a.estado?.nombre }}</span>
+                <span class="badge completada">{{ a.estado.nombre }}</span>
               </td>
             </tr>
           </tbody>

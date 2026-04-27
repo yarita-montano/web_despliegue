@@ -1,0 +1,275 @@
+.admin-ganancias {
+  padding: 20px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 20px;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e0e0e0;
+
+    h2 {
+      margin: 0;
+      color: #333;
+      font-size: 22px;
+    }
+
+    .vista-toggle {
+      display: flex;
+      gap: 10px;
+
+      .tab-btn {
+        padding: 8px 16px;
+        border: 2px solid #ddd;
+        background: white;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+        color: #666;
+
+        &:hover {
+          border-color: #007bff;
+          color: #007bff;
+        }
+
+        &.active {
+          background: #007bff;
+          border-color: #007bff;
+          color: white;
+        }
+      }
+    }
+  }
+
+  .filtros-section {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 6px;
+    flex-wrap: wrap;
+
+    .filtro-grupo {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+
+      label {
+        font-weight: 500;
+        color: #555;
+        font-size: 13px;
+      }
+
+      select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+
+        &:focus {
+          outline: none;
+          border-color: #007bff;
+        }
+      }
+    }
+  }
+
+  // STATS RESUMEN
+  .stats-resumen {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid #007bff;
+
+      .stat-valor {
+        font-size: 24px;
+        font-weight: 700;
+        color: #007bff;
+        margin-bottom: 8px;
+      }
+
+      .stat-label {
+        font-size: 13px;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+
+  // TABLA
+  .tabla-responsiva {
+    overflow-x: auto;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .tabla-ganancias {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+      background: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+
+      th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        font-size: 13px;
+        text-transform: uppercase;
+      }
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #dee2e6;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #f8f9fa;
+      }
+
+      td {
+        padding: 15px;
+        color: #333;
+        font-size: 14px;
+
+        &.monto {
+          text-align: right;
+          font-weight: 500;
+          color: #007bff;
+        }
+
+        &.centro {
+          text-align: center;
+        }
+      }
+    }
+
+    tfoot {
+      background: #f8f9fa;
+      border-top: 2px solid #dee2e6;
+      font-weight: 600;
+
+      tr {
+        border: none;
+
+        td {
+          padding: 15px;
+          color: #333;
+
+          &.monto {
+            text-align: right;
+            color: #007bff;
+          }
+        }
+      }
+    }
+  }
+
+  .rating-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #fff3cd;
+    color: #856404;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .loading,
+  .no-datos {
+    padding: 30px;
+    text-align: center;
+    color: #666;
+    background: white;
+    border-radius: 6px;
+    font-size: 16px;
+  }
+}
+
+// BOTONES
+.btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &.btn-primary {
+    background: #007bff;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: #0056b3;
+    }
+  }
+}
+
+// RESPONSIVE
+@media (max-width: 768px) {
+  .admin-ganancias {
+    .section-header {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+
+      h2 {
+        font-size: 18px;
+      }
+
+      .vista-toggle {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    .filtros-section {
+      flex-direction: column;
+      align-items: stretch;
+
+      .filtro-grupo {
+        width: 100%;
+      }
+    }
+
+    .stats-resumen {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tabla-ganancias {
+      font-size: 12px;
+
+      thead th,
+      tbody td,
+      tfoot td {
+        padding: 10px;
+      }
+    }
+  }
+}

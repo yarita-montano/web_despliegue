@@ -58,6 +58,51 @@
   padding: 40px 24px;
 }
 
+.earnings-section {
+  margin-bottom: 30px;
+
+  .earnings-card {
+    background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(17, 94, 89, 0.25);
+
+    h3 {
+      margin: 0 0 14px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .earnings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .earnings-item {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .earnings-label {
+      margin: 0;
+      font-size: 12px;
+      opacity: 0.85;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .earnings-value {
+      margin: 8px 0 0;
+      font-size: 24px;
+      font-weight: 700;
+    }
+  }
+}
+
 .welcome-section {
   margin-bottom: 30px;
   text-align: center;

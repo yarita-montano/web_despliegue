@@ -55,6 +55,9 @@ export class DashboardTallerComponent implements OnInit, OnDestroy {
   exito: string | null = null;
   exitoTecnico: string | null = null;
   cargandoResumen = false;
+  gananciasMes = 0;
+  ticketPromedioMes = 0;
+  totalServiciosMes = 0;
 
   notificaciones: Notificacion[] = [];
   notificacionesNoLeidas = 0;
@@ -102,11 +105,20 @@ export class DashboardTallerComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.cargarDatosTaller();
     this.cargarResumenDashboard();
+
+    if (!this.esTallerAutenticado()) {
+      return;
+    }
+
     this.cargarNotificaciones();
     this.notifService.initFirebase();
     // Poll notificaciones cada 30s
     this._notifSub = interval(30_000)
-      .pipe(switchMap(() => this.notifService.getMisNotificaciones()))
+      .pipe(
+        switchMap(() => this.notifService.getMisNotificaciones().pipe(
+          catchError(() => of([] as Notificacion[]))
+        ))
+      )
       .subscribe(data => {
         this.notificaciones = data;
         this.notificacionesNoLeidas = data.filter(n => !n.leido).length;
@@ -119,13 +131,21 @@ export class DashboardTallerComponent implements OnInit, OnDestroy {
   }
 
   cargarNotificaciones(): void {
-    this.notifService.getMisNotificaciones().subscribe({
-      next: (data) => {
-        this.notificaciones = data;
-        this.notificacionesNoLeidas = data.filter(n => !n.leido).length;
-        this.cdr.markForCheck();
-      }
-    });
+    if (!this.esTallerAutenticado()) return;
+
+    this.notifService.getMisNotificaciones()
+      .pipe(catchError(() => of([] as Notificacion[])))
+      .subscribe({
+        next: (data) => {
+          this.notificaciones = data;
+          this.notificacionesNoLeidas = data.filter(n => !n.leido).length;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  private esTallerAutenticado(): boolean {
+    return this.authService.getTipo() === 'taller' && !!this.authService.getToken();
   }
 
   toggleNotificaciones(): void {
@@ -192,6 +212,15 @@ export class DashboardTallerComponent implements OnInit, OnDestroy {
       next: ({ pendientes, aceptadas, enCamino, historialMes, tecnicos, evaluaciones }) => {
         this.solicitudesPendientes = pendientes;
         this.tecnicos = tecnicos;
+        this.totalServiciosMes = historialMes.length;
+
+        this.gananciasMes = historialMes.reduce((acumulado, asignacion) => {
+          return acumulado + this.obtenerMontoAsignacion(asignacion);
+        }, 0);
+
+        this.ticketPromedioMes = this.totalServiciosMes > 0
+          ? this.gananciasMes / this.totalServiciosMes
+          : 0;
 
         const tecnicosDisponibles = tecnicos.filter(t => t.activo && t.disponible).length;
         const promedioResenas = evaluaciones.length
@@ -549,5 +578,27 @@ export class DashboardTallerComponent implements OnInit, OnDestroy {
   private fechaDeHoy(): string {
     const date = new Date();
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  private obtenerMontoAsignacion(asignacion: AsignacionTaller): number {
+    const valor = asignacion.costo_final ?? asignacion.costo_estimado ?? 0;
+    const numero = Number(valor);
+    return Number.isFinite(numero) ? numero : 0;
+  }
+
+  private formatearMoneda(valor: number): string {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+    }).format(valor);
+  }
+
+  get gananciasMesFmt(): string {
+    return this.formatearMoneda(this.gananciasMes);
+  }
+
+  get ticketPromedioMesFmt(): string {
+    return this.formatearMoneda(this.ticketPromedioMes);
   }
 }

@@ -309,6 +309,26 @@
       </div>
     </section>
 
+    <section class="earnings-section">
+      <div class="earnings-card">
+        <h3>💰 Resumen de Ganancias del Mes</h3>
+        <div class="earnings-grid">
+          <div class="earnings-item">
+            <p class="earnings-label">Total ganado</p>
+            <p class="earnings-value">{{ gananciasMesFmt }}</p>
+          </div>
+          <div class="earnings-item">
+            <p class="earnings-label">Servicios completados</p>
+            <p class="earnings-value">{{ totalServiciosMes }}</p>
+          </div>
+          <div class="earnings-item">
+            <p class="earnings-label">Ticket promedio</p>
+            <p class="earnings-value">{{ ticketPromedioMesFmt }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Sección de Técnicos -->
     @if (mostrarTecnicos) {
     <section class="tecnicos-section">

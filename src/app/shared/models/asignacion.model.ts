@@ -51,6 +51,8 @@ export interface AsignacionTaller {
   id_usuario: number | null;
   id_estado_asignacion: number;
   eta_minutos: number | null;
+  costo_estimado?: number | null;
+  costo_final?: number | null;
   nota_taller: string | null;
   created_at: string;
   updated_at: string;

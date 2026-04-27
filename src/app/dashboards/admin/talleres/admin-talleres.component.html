@@ -1,0 +1,220 @@
+<div class="admin-talleres">
+  <header class="section-header">
+    <h2>📋 Gestión de Talleres</h2>
+    <button class="btn btn-primary" (click)="abrirFormulario()" [disabled]="cargando">
+      ➕ Registrar Taller
+    </button>
+  </header>
+
+  <!-- FORMULARIO MODAL -->
+  @if (mostrarFormulario) {
+    <div class="formulario-overlay" (click)="cerrarFormulario()">
+      <div class="formulario-contenedor" (click)="$event.stopPropagation()">
+        <h3>Registrar Taller</h3>
+
+        <form [formGroup]="formTaller" (ngSubmit)="guardarTaller()">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre *</label>
+              <input type="text" formControlName="nombre" placeholder="Nombre del taller" class="form-input">
+              @if (formTaller.get('nombre')?.invalid && formTaller.get('nombre')?.touched) {
+                <span class="error-msg">Mínimo 2 caracteres</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" formControlName="email" placeholder="email@taller.com" class="form-input">
+              @if (formTaller.get('email')?.hasError('email') && formTaller.get('email')?.touched) {
+                <span class="error-msg">Email inválido</span>
+              }
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Contraseña inicial *</label>
+            <input type="password" formControlName="password" placeholder="Mínimo 8 caracteres" class="form-input">
+            @if (formTaller.get('password')?.invalid && formTaller.get('password')?.touched) {
+              <span class="error-msg">Mínimo 8 caracteres</span>
+            }
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Teléfono</label>
+              <input type="tel" formControlName="telefono" placeholder="Teléfono" class="form-input">
+            </div>
+
+            <div class="form-group">
+              <label>Capacidad máx.</label>
+              <input type="number" formControlName="capacidad_max" min="1" max="100" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Dirección</label>
+            <input type="text" formControlName="direccion" placeholder="Dirección del taller" class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label>Ubicación del taller *</label>
+            <div class="map-wrapper">
+              <div #mapContainer class="map-container"></div>
+              <p class="map-hint">Haz click en el mapa para colocar el pin.</p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Latitud *</label>
+              <input
+                type="number"
+                step="0.000001"
+                formControlName="latitud"
+                placeholder="Ej: -12.046400"
+                class="form-input"
+                (change)="actualizarMarcadorDesdeInputs()"
+              >
+              @if (formTaller.get('latitud')?.invalid && formTaller.get('latitud')?.touched) {
+                <span class="error-msg">Latitud inválida</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label>Longitud *</label>
+              <input
+                type="number"
+                step="0.000001"
+                formControlName="longitud"
+                placeholder="Ej: -77.042800"
+                class="form-input"
+                (change)="actualizarMarcadorDesdeInputs()"
+              >
+              @if (formTaller.get('longitud')?.invalid && formTaller.get('longitud')?.touched) {
+                <span class="error-msg">Longitud inválida</span>
+              }
+            </div>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input type="checkbox" formControlName="verificado">
+              Marcar como verificado al crear
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-success" [disabled]="formTaller.invalid || cargando">
+              {{ cargando ? 'Guardando...' : 'Guardar' }}
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="cerrarFormulario()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- FILTROS -->
+  <section class="filtros-section">
+    <div class="filtro-grupo">
+      <label>Estado:</label>
+      <select [(ngModel)]="filtroActivo" class="form-select">
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+    </div>
+
+    <div class="filtro-grupo">
+      <label>Verificado:</label>
+      <select [(ngModel)]="filtroVerificado" class="form-select">
+        <option value="">Todos</option>
+        <option value="true">Verificados</option>
+        <option value="false">Pendientes</option>
+      </select>
+    </div>
+
+    <div class="filtro-grupo">
+      <label>Buscar:</label>
+      <input
+        type="text"
+        [(ngModel)]="buscar"
+        placeholder="Nombre o email"
+        class="form-input"
+        (keyup.enter)="aplicarFiltros()"
+      >
+    </div>
+
+    <div class="filtro-acciones">
+      <button class="btn btn-primary" (click)="aplicarFiltros()" [disabled]="cargando">🔍 Filtrar</button>
+      <button class="btn btn-secondary" (click)="limpiarFiltros()">✖️ Limpiar</button>
+    </div>
+  </section>
+
+  <!-- TABLA -->
+  @if (cargando) {
+    <div class="loading">Cargando talleres...</div>
+  } @else if (talleres.length === 0) {
+    <div class="no-datos">No hay talleres que coincidan con los filtros</div>
+  } @else {
+    <div class="tabla-responsiva">
+      <table class="tabla-talleres">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Cap.</th>
+            <th>Verificado</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (taller of talleres; track taller.id_taller) {
+            <tr [class.fila-inactiva]="!taller.activo">
+              <td>{{ taller.id_taller }}</td>
+              <td><strong>{{ taller.nombre }}</strong></td>
+              <td>{{ taller.email }}</td>
+              <td>{{ taller.telefono || '-' }}</td>
+              <td class="centro">{{ taller.capacidad_max }}</td>
+              <td>
+                <span class="badge" [class.badge-success]="taller.verificado" [class.badge-warning]="!taller.verificado">
+                  {{ taller.verificado ? '✓ Verificado' : '⏳ Pendiente' }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [class.badge-success]="taller.activo" [class.badge-danger]="!taller.activo">
+                  {{ taller.activo ? '✓ Activo' : '✗ Inactivo' }}
+                </span>
+              </td>
+              <td class="acciones">
+                <button
+                  class="btn-icon"
+                  [class.btn-verify]="!taller.verificado"
+                  [class.btn-unverify]="taller.verificado"
+                  (click)="verificarTaller(taller)"
+                  [title]="taller.verificado ? 'Desverificar' : 'Verificar'"
+                >
+                  {{ taller.verificado ? '✓' : '○' }}
+                </button>
+                <button
+                  class="btn-icon btn-delete"
+                  (click)="eliminarTaller(taller)"
+                  [disabled]="!taller.activo"
+                  title="Dar de baja"
+                >
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

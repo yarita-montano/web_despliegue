@@ -197,3 +197,23 @@
     grid-template-columns: 1fr;
   }
 }
+
+.nav-volver {
+  margin-bottom: 20px;
+
+  .btn-volver {
+    padding: 10px 16px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #e0e0e0;
+    }
+  }
+}

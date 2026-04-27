@@ -1,0 +1,207 @@
+<div class="admin-ganancias">
+  <header class="section-header">
+    <h2>📊 Reporte de Ganancias</h2>
+    <div class="vista-toggle">
+      <button
+        [class.active]="vistaActual === 'mensual'"
+        (click)="cambiarVista('mensual')"
+        class="tab-btn"
+      >
+        📅 Mensual
+      </button>
+      <button
+        [class.active]="vistaActual === 'taller'"
+        (click)="cambiarVista('taller')"
+        class="tab-btn"
+      >
+        🏢 Por Taller
+      </button>
+    </div>
+  </header>
+
+  <!-- VISTA MENSUAL -->
+  @if (vistaActual === 'mensual') {
+    <div class="vista-mensual">
+      <div class="filtros-section">
+        <div class="filtro-grupo">
+          <label>Anio:</label>
+          <select [(ngModel)]="anio" (change)="cargarGanancias()" class="form-select">
+            <option [value]="2024">2024</option>
+            <option [value]="2025">2025</option>
+            <option [value]="2026">2026</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" (click)="cargarGanancias()" [disabled]="cargando">
+          🔄 Actualizar
+        </button>
+      </div>
+
+      @if (cargando) {
+        <div class="loading">Cargando datos...</div>
+      } @else if (gananciasMensual.length === 0) {
+        <div class="no-datos">No hay datos de ganancias disponibles</div>
+      } @else {
+        <div class="stats-resumen">
+          <div class="stat-card">
+            <div class="stat-valor">{{ totalComisionMensual | currency }}</div>
+            <div class="stat-label">Comisión Total Año</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-valor">{{ gananciasMensual.length }}</div>
+            <div class="stat-label">Meses con datos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-valor">{{ totalServiciosMensual }}</div>
+            <div class="stat-label">Total Servicios</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-valor">{{ (totalComisionMensual / gananciasMensual.length) | currency }}</div>
+            <div class="stat-label">Promedio Mensual</div>
+          </div>
+        </div>
+
+        <div class="tabla-responsiva">
+          <table class="tabla-ganancias">
+            <thead>
+              <tr>
+                <th>Mes</th>
+                <th>Año</th>
+                <th>Total Pagos</th>
+                <th>Monto Procesado</th>
+                <th>Comisión Plataforma</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ganancia of gananciasMensual; track ganancia.mes) {
+                <tr>
+                  <td><strong>{{ ganancia.nombre_mes }}</strong></td>
+                  <td>{{ ganancia.anio }}</td>
+                  <td class="centro">{{ ganancia.total_pagos }}</td>
+                  <td class="monto">{{ ganancia.monto_total_procesado | currency }}</td>
+                  <td class="monto">{{ ganancia.comision_plataforma | currency }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2"><strong>TOTAL</strong></td>
+                <td class="centro"><strong>{{ totalServiciosMensual }}</strong></td>
+                <td></td>
+                <td class="monto"><strong>{{ totalComisionMensual | currency }}</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- VISTA POR TALLER -->
+  @if (vistaActual === 'taller') {
+    <div class="vista-taller">
+      <div class="filtros-section">
+        <div class="filtro-grupo">
+          <label>Anio:</label>
+          <select [(ngModel)]="anio" (change)="cargarGanancias()" class="form-select">
+            <option [value]="2024">2024</option>
+            <option [value]="2025">2025</option>
+            <option [value]="2026">2026</option>
+          </select>
+        </div>
+
+        <div class="filtro-grupo">
+          <label>Mes:</label>
+          <select [(ngModel)]="mes" (change)="cargarGanancias()" class="form-select">
+            <option [value]="1">Enero</option>
+            <option [value]="2">Febrero</option>
+            <option [value]="3">Marzo</option>
+            <option [value]="4">Abril</option>
+            <option [value]="5">Mayo</option>
+            <option [value]="6">Junio</option>
+            <option [value]="7">Julio</option>
+            <option [value]="8">Agosto</option>
+            <option [value]="9">Septiembre</option>
+            <option [value]="10">Octubre</option>
+            <option [value]="11">Noviembre</option>
+            <option [value]="12">Diciembre</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" (click)="cargarGanancias()" [disabled]="cargando">
+          🔄 Actualizar
+        </button>
+      </div>
+
+      @if (cargando) {
+        <div class="loading">Cargando datos...</div>
+      } @else if (gananciaPorTaller.length === 0) {
+        <div class="no-datos">No hay datos de ganancias para este período</div>
+      } @else {
+        <div class="stats-resumen">
+          <div class="stat-card">
+            <div class="stat-valor">{{ totalComisionTaller | currency }}</div>
+            <div class="stat-label">Comisión Total</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-valor">{{ gananciaPorTaller.length }}</div>
+            <div class="stat-label">Talleres con actividad</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-valor">{{ promedioRating | number: '1.2-2' }}</div>
+            <div class="stat-label">Rating Promedio</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-valor">{{ totalServiciosTaller }}</div>
+            <div class="stat-label">Total Servicios</div>
+          </div>
+        </div>
+
+        <div class="tabla-responsiva">
+          <table class="tabla-ganancias">
+            <thead>
+              <tr>
+                <th>Taller</th>
+                <th>Email</th>
+                <th>Comisión Plataforma</th>
+                <th>Servicios</th>
+                <th>Rating</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ganancia of gananciaPorTaller; track ganancia.id_taller) {
+                <tr>
+                  <td><strong>{{ ganancia.nombre_taller }}</strong></td>
+                  <td>{{ ganancia.email }}</td>
+                  <td class="monto">{{ ganancia.comision_plataforma | currency }}</td>
+                  <td class="centro">{{ ganancia.total_pagos }}</td>
+                  <td>
+                    @if (ganancia.promedio_estrellas != null) {
+                      <span class="rating-badge">⭐ {{ ganancia.promedio_estrellas | number: '1.1-1' }}</span>
+                    } @else {
+                      <span class="rating-badge">—</span>
+                    }
+                  </td>
+                  <td>
+                    <span class="badge" [class.badge-success]="ganancia.activo" [class.badge-danger]="!ganancia.activo">
+                      {{ ganancia.activo ? '✓ Activo' : '✗ Inactivo' }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2"><strong>TOTAL</strong></td>
+                <td class="monto"><strong>{{ totalComisionTaller | currency }}</strong></td>
+                <td class="centro"><strong>{{ totalServiciosTaller }}</strong></td>
+                <td><strong>{{ promedioRating | number: '1.2-2' }}</strong></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>
