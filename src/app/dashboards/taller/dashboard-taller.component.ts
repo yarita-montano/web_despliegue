@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, TallerAuth } from '../../shared/services/auth.service';
-import { TallerService, Taller, Tecnico, TecnicoCreate, TecnicoUpdate } from '../../shared/services/taller.service';
+import { TallerService, Taller, Tecnico, TecnicoCreate, TecnicoUpdate, CategoriaDisponible, ServicioTaller } from '../../shared/services/taller.service';
 import { AsignacionesService } from '../../shared/services/asignaciones.service';
 import { AsignacionTaller } from '../../shared/models/asignacion.model';
 import { EvaluacionResponse } from '../../shared/models/evaluacion.model';
@@ -40,6 +40,12 @@ export class DashboardTallerComponent implements OnInit, OnDestroy {
 
   mostrarTecnicos = false;
   cargandoTecnicos = false;
+
+  categorias: CategoriaDisponible[] = [];
+  misServicios = new Set<number>();
+  mostrarServicios = false;
+  cargandoServicios = false;
+  guardandoServicios = false;
 
   editForm: FormGroup;
   formTecnico: FormGroup;
@@ -106,6 +112,7 @@ export class DashboardTallerComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.cargarDatosTaller();
     this.cargarResumenDashboard();
+    this.cargarCategorias();
 
     if (!this.esTallerAutenticado()) {
       return;
@@ -594,6 +601,64 @@ export class DashboardTallerComponent implements OnInit, OnDestroy {
         this.cambiandoDisponibilidad = false;
       }
     });
+  }
+
+  // ── GESTIÓN DE SERVICIOS ─────────────────────────────────────────────────
+
+  cargarCategorias(): void {
+    this.tallerService.obtenerCategorias()
+      .pipe(catchError(() => of([] as CategoriaDisponible[])))
+      .subscribe(cats => { this.categorias = cats; this.cdr.markForCheck(); });
+  }
+
+  toggleServicios(): void {
+    this.mostrarServicios = !this.mostrarServicios;
+    if (this.mostrarServicios && this.misServicios.size === 0) {
+      this.cargarMisServicios();
+    }
+    this.cdr.markForCheck();
+  }
+
+  cargarMisServicios(): void {
+    this.cargandoServicios = true;
+    this.tallerService.obtenerMisServicios()
+      .pipe(catchError(() => of([] as ServicioTaller[])))
+      .subscribe(servicios => {
+        this.misServicios = new Set(servicios.map(s => s.id_categoria));
+        this.cargandoServicios = false;
+        this.cdr.markForCheck();
+      });
+  }
+
+  toggleServicio(id: number): void {
+    if (this.misServicios.has(id)) {
+      this.misServicios.delete(id);
+    } else {
+      this.misServicios.add(id);
+    }
+  }
+
+  tieneServicio(id: number): boolean {
+    return this.misServicios.has(id);
+  }
+
+  guardarServicios(): void {
+    this.guardandoServicios = true;
+    this.tallerService.actualizarMisServicios(Array.from(this.misServicios))
+      .subscribe({
+        next: (servicios) => {
+          this.misServicios = new Set(servicios.map(s => s.id_categoria));
+          this.exito = '✅ Servicios actualizados correctamente';
+          this.guardandoServicios = false;
+          setTimeout(() => { this.exito = null; this.cdr.markForCheck(); }, 3000);
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          this.error = err?.error?.detail || 'Error al actualizar servicios';
+          this.guardandoServicios = false;
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   logout(): void {

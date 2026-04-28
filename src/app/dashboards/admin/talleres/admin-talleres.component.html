@@ -72,7 +72,7 @@
                 type="number"
                 step="0.000001"
                 formControlName="latitud"
-                placeholder="Ej: -12.046400"
+                placeholder="Ej: -17.802625"
                 class="form-input"
                 (change)="actualizarMarcadorDesdeInputs()"
               >
@@ -87,7 +87,7 @@
                 type="number"
                 step="0.000001"
                 formControlName="longitud"
-                placeholder="Ej: -77.042800"
+                placeholder="Ej: -63.200045"
                 class="form-input"
                 (change)="actualizarMarcadorDesdeInputs()"
               >
@@ -96,6 +96,73 @@
               }
             </div>
           </div>
+
+          <!-- CATEGORÍAS -->
+          <div class="form-group">
+            <div class="categorias-header">
+              <label>Servicios que atiende</label>
+              <div class="categorias-acciones">
+                <button type="button" class="btn-link" (click)="seleccionarTodas()">Seleccionar todas</button>
+                <span class="sep">|</span>
+                <button type="button" class="btn-link" (click)="deseleccionarTodas()">Ninguna</button>
+                <span class="sep">|</span>
+                <button type="button" class="btn-link btn-link-add" (click)="abrirFormCategoria()">+ Nueva categoría</button>
+              </div>
+            </div>
+
+            <div class="categorias-grid">
+              @for (cat of categorias; track cat.id_categoria) {
+                <label class="categoria-chip" [class.seleccionada]="estaSeleccionada(cat.id_categoria)">
+                  <input
+                    type="checkbox"
+                    [checked]="estaSeleccionada(cat.id_categoria)"
+                    (change)="toggleCategoria(cat.id_categoria)"
+                  >
+                  <span>{{ cat.nombre }}</span>
+                </label>
+              }
+              @if (categorias.length === 0) {
+                <span class="sin-categorias">No hay categorías. Crea una con "+ Nueva categoría".</span>
+              }
+            </div>
+
+            @if (categoriasSeleccionadas.size > 0) {
+              <p class="categorias-resumen">{{ categoriasSeleccionadas.size }} categoría(s) seleccionada(s)</p>
+            }
+          </div>
+
+          <!-- FORMULARIO NUEVA CATEGORÍA (inline) -->
+          @if (mostrarFormCategoria) {
+            <div class="nueva-categoria-form" [formGroup]="formCategoria">
+              <h4>Nueva categoría</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Nombre *</label>
+                  <input type="text" formControlName="nombre" placeholder="Ej: frenos" class="form-input">
+                  @if (formCategoria.get('nombre')?.invalid && formCategoria.get('nombre')?.touched) {
+                    <span class="error-msg">Mínimo 2 caracteres</span>
+                  }
+                </div>
+                <div class="form-group">
+                  <label>Descripción</label>
+                  <input type="text" formControlName="descripcion" placeholder="Descripción opcional" class="form-input">
+                </div>
+              </div>
+              <div class="nueva-categoria-acciones">
+                <button
+                  type="button"
+                  class="btn btn-success btn-sm"
+                  (click)="guardarNuevaCategoria()"
+                  [disabled]="guardandoCategoria || formCategoria.invalid"
+                >
+                  {{ guardandoCategoria ? 'Guardando...' : 'Crear categoría' }}
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" (click)="cancelarFormCategoria()">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          }
 
           <div class="form-group checkbox-group">
             <label>

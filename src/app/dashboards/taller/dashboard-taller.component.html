@@ -157,6 +157,9 @@
       <button type="button" class="btn btn-primary" (click)="toggleTecnicos()">
         {{ mostrarTecnicos ? '▲ Ocultar' : '▼ Ver' }} mis técnicos
       </button>
+      <button type="button" class="btn btn-primary" (click)="toggleServicios()">
+        {{ mostrarServicios ? '▲ Ocultar' : '▼ Ver' }} mis servicios
+      </button>
     </section>
 
     @if (mostrarInfoTaller) {
@@ -438,6 +441,53 @@
         }
       </div>
     </section>
+    }
+
+    <!-- Sección de Servicios -->
+    @if (mostrarServicios) {
+      <section class="servicios-section">
+        <div class="servicios-card">
+          <div class="servicios-header">
+            <div>
+              <h3>🔧 Mis Servicios</h3>
+              <p class="servicios-hint">Marca los tipos de problemas que atiendes. El motor de asignación usará esta lista para enviarte solicitudes.</p>
+            </div>
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="guardarServicios()"
+              [disabled]="guardandoServicios || cargandoServicios"
+            >
+              {{ guardandoServicios ? 'Guardando...' : '💾 Guardar cambios' }}
+            </button>
+          </div>
+
+          @if (cargandoServicios) {
+            <p class="loading">Cargando servicios...</p>
+          } @else {
+            <div class="categorias-grid">
+              @for (cat of categorias; track cat.id_categoria) {
+                <label class="categoria-chip" [class.seleccionada]="tieneServicio(cat.id_categoria)">
+                  <input
+                    type="checkbox"
+                    [checked]="tieneServicio(cat.id_categoria)"
+                    (change)="toggleServicio(cat.id_categoria)"
+                  >
+                  <span>{{ cat.nombre }}</span>
+                </label>
+              }
+              @if (categorias.length === 0) {
+                <span class="sin-categorias">No hay categorías disponibles</span>
+              }
+            </div>
+            @if (misServicios.size > 0) {
+              <p class="servicios-resumen">{{ misServicios.size }} servicio(s) seleccionado(s)</p>
+            } @else {
+              <p class="servicios-advertencia">⚠️ Sin servicios seleccionados no recibirás solicitudes</p>
+            }
+          }
+        </div>
+      </section>
     }
 
     <!-- Modal de Agregar/Editar Técnico -->

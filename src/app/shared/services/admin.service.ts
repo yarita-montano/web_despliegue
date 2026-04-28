@@ -29,6 +29,12 @@ export interface TallerAdminStats extends TallerAdmin {
   monto_total_procesado: number;
 }
 
+export interface CategoriaAdmin {
+  id_categoria: number;
+  nombre: string;
+  descripcion?: string | null;
+}
+
 export interface TallerAdminCreate {
   nombre: string;
   email: string;
@@ -39,6 +45,7 @@ export interface TallerAdminCreate {
   longitud?: number;
   capacidad_max?: number;
   verificado?: boolean;
+  categorias: number[];
 }
 
 // Fila de ganancias mensuales (backend: GananciaMensualRow)
@@ -119,6 +126,16 @@ export class AdminService {
 
   eliminarTaller(id: number): Observable<{ mensaje: string }> {
     return this.httpService.delete<{ mensaje: string }>(`${this.base}/talleres/${id}`);
+  }
+
+  // ── CATEGORÍAS ─────────────────────────────────────────────────────────────
+
+  obtenerCategorias(): Observable<CategoriaAdmin[]> {
+    return this.httpService.get<CategoriaAdmin[]>(`${this.base}/categorias`);
+  }
+
+  crearCategoria(datos: { nombre: string; descripcion?: string }): Observable<CategoriaAdmin> {
+    return this.httpService.post<CategoriaAdmin>(`${this.base}/categorias`, datos);
   }
 
   // ── GANANCIAS ───────────────────────────────────────────────────────────────

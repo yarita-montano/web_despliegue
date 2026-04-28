@@ -40,6 +40,16 @@ export interface TecnicoCreate {
   telefono?: string;
 }
 
+export interface CategoriaDisponible {
+  id_categoria: number;
+  nombre: string;
+  descripcion?: string | null;
+}
+
+export interface ServicioTaller extends CategoriaDisponible {
+  servicio_movil: boolean;
+}
+
 export interface TecnicoUpdate {
   nombre?: string;
   email?: string;
@@ -142,6 +152,18 @@ export class TallerService {
         return throwError(() => err);
       })
     );
+  }
+
+  obtenerCategorias(): Observable<CategoriaDisponible[]> {
+    return this.http.get<CategoriaDisponible[]>('/talleres/categorias');
+  }
+
+  obtenerMisServicios(): Observable<ServicioTaller[]> {
+    return this.http.get<ServicioTaller[]>('/talleres/mi-taller/servicios');
+  }
+
+  actualizarMisServicios(categorias: number[]): Observable<ServicioTaller[]> {
+    return this.http.put<ServicioTaller[]>('/talleres/mi-taller/servicios', { categorias });
   }
 
   /**

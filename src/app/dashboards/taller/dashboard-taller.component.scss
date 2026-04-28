@@ -789,6 +789,102 @@
   }
 }
 
+// ===== SERVICIOS SECTION =====
+
+.servicios-section {
+  margin: 40px 0;
+
+  .servicios-card {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .servicios-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+
+      h3 {
+        margin: 0 0 4px;
+        font-size: 20px;
+        color: #333;
+        font-weight: 600;
+      }
+
+      .servicios-hint {
+        margin: 0;
+        font-size: 13px;
+        color: #888;
+      }
+    }
+
+    .categorias-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fafafa;
+      min-height: 60px;
+    }
+
+    .categoria-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: 2px solid #dee2e6;
+      border-radius: 24px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #555;
+      background: white;
+      transition: all 0.15s;
+      user-select: none;
+
+      input[type="checkbox"] { display: none; }
+
+      &:hover {
+        border-color: #4facfe;
+        color: #4facfe;
+      }
+
+      &.seleccionada {
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+        border-color: transparent;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(79, 172, 254, 0.4);
+      }
+    }
+
+    .sin-categorias {
+      font-size: 13px;
+      color: #aaa;
+      font-style: italic;
+      align-self: center;
+    }
+
+    .servicios-resumen {
+      margin: 10px 0 0;
+      font-size: 13px;
+      color: #28a745;
+      font-weight: 500;
+    }
+
+    .servicios-advertencia {
+      margin: 10px 0 0;
+      font-size: 13px;
+      color: #e67e22;
+      font-weight: 500;
+    }
+  }
+}
+
 // ===== SOLICITUDES PENDIENTES SECTION =====
 
 .solicitudes-pendientes-section {

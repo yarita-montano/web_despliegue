@@ -157,6 +157,124 @@
         justify-content: flex-end;
         margin-top: 20px;
       }
+
+      // CATEGORÍAS
+      .categorias-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 10px;
+
+        label {
+          font-weight: 500;
+          color: #333;
+          font-size: 14px;
+          margin: 0;
+        }
+
+        .categorias-acciones {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12px;
+
+          .sep { color: #ccc; }
+        }
+      }
+
+      .btn-link {
+        background: none;
+        border: none;
+        color: #007bff;
+        cursor: pointer;
+        font-size: 12px;
+        padding: 0;
+        text-decoration: underline;
+
+        &:hover { color: #0056b3; }
+        &.btn-link-add { color: #28a745; &:hover { color: #1e7e34; } }
+      }
+
+      .categorias-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #fafafa;
+        min-height: 52px;
+      }
+
+      .categoria-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border: 1.5px solid #dee2e6;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #555;
+        background: white;
+        transition: all 0.15s;
+        user-select: none;
+
+        input[type="checkbox"] { display: none; }
+
+        &:hover {
+          border-color: #007bff;
+          color: #007bff;
+        }
+
+        &.seleccionada {
+          background: #007bff;
+          border-color: #007bff;
+          color: white;
+          font-weight: 500;
+        }
+      }
+
+      .sin-categorias {
+        font-size: 13px;
+        color: #999;
+        font-style: italic;
+        align-self: center;
+      }
+
+      .categorias-resumen {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: #28a745;
+        font-weight: 500;
+      }
+
+      // FORM NUEVA CATEGORÍA (inline)
+      .nueva-categoria-form {
+        background: #f0f7ff;
+        border: 1px solid #b8d4f0;
+        border-radius: 8px;
+        padding: 16px;
+
+        h4 {
+          margin: 0 0 12px;
+          font-size: 14px;
+          color: #0056b3;
+        }
+
+        .nueva-categoria-acciones {
+          display: flex;
+          gap: 8px;
+          margin-top: 10px;
+        }
+      }
+
+      .btn-sm {
+        padding: 6px 12px;
+        font-size: 13px;
+      }
     }
   }
 
