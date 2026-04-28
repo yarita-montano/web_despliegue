@@ -355,7 +355,12 @@
     @if (mostrarTecnicos) {
     <section class="tecnicos-section">
       <div class="tecnicos-card">
-        <h3>👨‍🔧 Mis Técnicos</h3>
+        <div class="tecnicos-header">
+          <h3>👨‍🔧 Mis Técnicos</h3>
+          <button type="button" class="btn btn-primary" (click)="abrirFormularioTecnico()">
+            ➕ Agregar Técnico
+          </button>
+        </div>
 
         @if (errorTecnico) {
           <div class="alert alert-error">
@@ -425,18 +430,12 @@
           </div>
         } @else {
           <p class="empty-state">
-            No hay técnicos registrados. <button type="button" class="link-btn" (click)="abrirFormularioTecnico()">Agregar uno ahora</button>
+            No hay técnicos registrados.
+            <button type="button" class="link-btn" (click)="abrirFormularioTecnico()">
+              Agregar uno ahora
+            </button>
           </p>
         }
-
-        <button
-          type="button"
-          class="btn btn-primary"
-          (click)="abrirFormularioTecnico()"
-          style="margin-top: 20px;"
-        >
-          ➕ Agregar Técnico
-        </button>
       </div>
     </section>
     }

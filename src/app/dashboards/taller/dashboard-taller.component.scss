@@ -644,11 +644,19 @@
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
-    h3 {
-      margin: 0 0 20px 0;
-      font-size: 20px;
-      color: #333;
-      font-weight: 600;
+    .tecnicos-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+
+      h3 {
+        margin: 0;
+        font-size: 20px;
+        color: #333;
+        font-weight: 600;
+      }
     }
 
     .tecnicos-list {
