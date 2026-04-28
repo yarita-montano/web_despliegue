@@ -51,8 +51,17 @@ export class LoginComponent {
     this.loading.set(true);
     this.error.set(null);
 
-    const { email, password } = this.loginForm.value;
+    const email = (this.loginForm.value.email as string).trim();
+    const password = this.loginForm.value.password as string;
     const tipo = this.tipoSeleccionado();
+
+    const parseError = (err: any): string => {
+      const detail = err?.error?.detail;
+      if (!detail) return 'Error en el login. Intenta nuevamente.';
+      if (typeof detail === 'string') return detail;
+      if (Array.isArray(detail)) return detail.map((e: any) => e.msg ?? e).join(', ');
+      return 'Datos inválidos. Verifica email y contraseña.';
+    };
 
     if (tipo === 'taller') {
       this.authService.loginTaller(email, password).subscribe({
@@ -62,7 +71,7 @@ export class LoginComponent {
         },
         error: (err: any) => {
           this.loading.set(false);
-          this.error.set(err.error?.detail || 'Error en el login. Intenta nuevamente.');
+          this.error.set(parseError(err));
         }
       });
     } else {
@@ -73,7 +82,7 @@ export class LoginComponent {
         },
         error: (err: any) => {
           this.loading.set(false);
-          this.error.set(err.error?.detail || 'Error en el login. Intenta nuevamente.');
+          this.error.set(parseError(err));
         }
       });
     }
