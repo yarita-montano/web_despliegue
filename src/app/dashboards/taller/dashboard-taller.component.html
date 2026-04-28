@@ -46,6 +46,28 @@
             </div>
           }
         </div>
+        <!-- Menu desplegable de acciones -->
+        <div class="menu-wrapper">
+          <button class="btn-menu" (click)="toggleMenuAcciones()" title="Acciones">
+            ☰ Acciones
+          </button>
+          @if (mostrarMenuAcciones) {
+            <div class="menu-panel">
+              <button type="button" (click)="abrirCrearTecnicoDesdeMenu()">
+                ➕ Crear técnico
+              </button>
+              <button type="button" (click)="irATecnicosDesdeMenu()">
+                👨‍🔧 Ver técnicos
+              </button>
+              <button type="button" (click)="irATodasSolicitudesDesdeMenu()">
+                📋 Ver solicitudes
+              </button>
+              <button type="button" (click)="irAHistorialDesdeMenu()">
+                📜 Historial
+              </button>
+            </div>
+          }
+        </div>
         <!-- Accesos rápidos de navegación -->
         <button class="btn-nav" (click)="irAHistorial()">📜 Historial</button>
         <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>

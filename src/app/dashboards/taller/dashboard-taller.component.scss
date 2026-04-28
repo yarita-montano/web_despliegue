@@ -46,6 +46,58 @@
           background: rgba(255, 255, 255, 0.3);
         }
       }
+
+      .menu-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        .btn-menu {
+          background: rgba(255, 255, 255, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: white;
+          padding: 8px 12px;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 0.3s;
+          font-weight: 600;
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.3);
+          }
+        }
+
+        .menu-panel {
+          position: absolute;
+          top: 44px;
+          right: 0;
+          min-width: 190px;
+          background: white;
+          color: #333;
+          border-radius: 10px;
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+          padding: 8px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          z-index: 20;
+
+          button {
+            background: none;
+            border: none;
+            text-align: left;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #333;
+
+            &:hover {
+              background: #f0f7ff;
+            }
+          }
+        }
+      }
     }
   }
 }

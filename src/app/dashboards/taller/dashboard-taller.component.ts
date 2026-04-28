@@ -62,6 +62,7 @@ export class DashboardTallerComponent implements OnInit, OnDestroy {
   notificaciones: Notificacion[] = [];
   notificacionesNoLeidas = 0;
   mostrarNotificaciones = false;
+  mostrarMenuAcciones = false;
   private _notifSub?: Subscription;
 
   quickActions = [
@@ -150,6 +151,30 @@ export class DashboardTallerComponent implements OnInit, OnDestroy {
 
   toggleNotificaciones(): void {
     this.mostrarNotificaciones = !this.mostrarNotificaciones;
+  }
+
+  toggleMenuAcciones(): void {
+    this.mostrarMenuAcciones = !this.mostrarMenuAcciones;
+  }
+
+  abrirCrearTecnicoDesdeMenu(): void {
+    this.mostrarMenuAcciones = false;
+    this.abrirFormularioTecnico();
+  }
+
+  irATecnicosDesdeMenu(): void {
+    this.mostrarMenuAcciones = false;
+    this.handleAction('technicians');
+  }
+
+  irATodasSolicitudesDesdeMenu(): void {
+    this.mostrarMenuAcciones = false;
+    this.irATodasSolicitudes();
+  }
+
+  irAHistorialDesdeMenu(): void {
+    this.mostrarMenuAcciones = false;
+    this.irAHistorial();
   }
 
   marcarLeida(id: number): void {
@@ -525,6 +550,12 @@ export class DashboardTallerComponent implements OnInit, OnDestroy {
 
   handleAction(action: string): void {
     if (action === 'technicians') {
+      if (!this.mostrarTecnicos) {
+        this.mostrarTecnicos = true;
+        if (this.tecnicos.length === 0) {
+          this.cargarTecnicos();
+        }
+      }
       const section = document.querySelector('.tecnicos-section');
       section?.scrollIntoView({ behavior: 'smooth' });
     } else if (action === 'assignments') {
