@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { environment } from '../../../../environments/environment';
 
 export type TipoAuth = 'taller' | 'usuario';
 
@@ -45,7 +46,7 @@ export interface LoginAdminResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:8000';
+  private baseUrl = environment.apiUrl;
   private currentUser$ = new BehaviorSubject<User | null>(null);
   private currentTaller$ = new BehaviorSubject<TallerAuth | null>(null);
   private isAuthenticated$ = new BehaviorSubject<boolean>(false);
