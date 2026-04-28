@@ -157,10 +157,12 @@ export class DashboardTallerComponent implements OnInit, OnDestroy {
   }
 
   toggleNotificaciones(): void {
+    this.mostrarMenuAcciones = false;
     this.mostrarNotificaciones = !this.mostrarNotificaciones;
   }
 
   toggleMenuAcciones(): void {
+    this.mostrarNotificaciones = false;
     this.mostrarMenuAcciones = !this.mostrarMenuAcciones;
   }
 

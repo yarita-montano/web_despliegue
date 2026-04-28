@@ -208,7 +208,7 @@ export class AdminTalleresComponent implements OnInit, OnDestroy {
           this.categoriasSeleccionadas.add(nueva.id_categoria);
           this.mostrarFormCategoria = false;
           this.formCategoria.reset();
-          notificacion(`Categoría "${nueva.nombre}" creada`, 'success');
+          notificacion(`Servicio "${nueva.nombre}" creado`, 'success');
           this.cdr.markForCheck();
         },
         error: (err) => {

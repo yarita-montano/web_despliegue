@@ -70,5 +70,15 @@
       </nav>
       <app-admin-ganancias></app-admin-ganancias>
     }
+
+    <!-- VISTA SERVICIOS -->
+    @if (vistaActual === 'servicios') {
+      <nav class="nav-volver">
+        <button (click)="irAInicio()" class="btn-volver">
+          ← Volver al Inicio
+        </button>
+      </nav>
+      <app-admin-servicios></app-admin-servicios>
+    }
   </main>
 </div>

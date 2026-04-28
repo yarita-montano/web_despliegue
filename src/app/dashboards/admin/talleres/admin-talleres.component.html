@@ -106,7 +106,7 @@
                 <span class="sep">|</span>
                 <button type="button" class="btn-link" (click)="deseleccionarTodas()">Ninguna</button>
                 <span class="sep">|</span>
-                <button type="button" class="btn-link btn-link-add" (click)="abrirFormCategoria()">+ Nueva categoría</button>
+                <button type="button" class="btn-link btn-link-add" (click)="abrirFormCategoria()">+ Nuevo servicio</button>
               </div>
             </div>
 
@@ -122,19 +122,19 @@
                 </label>
               }
               @if (categorias.length === 0) {
-                <span class="sin-categorias">No hay categorías. Crea una con "+ Nueva categoría".</span>
+                <span class="sin-categorias">No hay servicios. Crea uno con "+ Nuevo servicio".</span>
               }
             </div>
 
             @if (categoriasSeleccionadas.size > 0) {
-              <p class="categorias-resumen">{{ categoriasSeleccionadas.size }} categoría(s) seleccionada(s)</p>
+              <p class="categorias-resumen">{{ categoriasSeleccionadas.size }} servicio(s) seleccionado(s)</p>
             }
           </div>
 
           <!-- FORMULARIO NUEVA CATEGORÍA (inline) -->
           @if (mostrarFormCategoria) {
             <div class="nueva-categoria-form" [formGroup]="formCategoria">
-              <h4>Nueva categoría</h4>
+              <h4>Nuevo servicio</h4>
               <div class="form-row">
                 <div class="form-group">
                   <label>Nombre *</label>
@@ -155,7 +155,7 @@
                   (click)="guardarNuevaCategoria()"
                   [disabled]="guardandoCategoria || formCategoria.invalid"
                 >
-                  {{ guardandoCategoria ? 'Guardando...' : 'Crear categoría' }}
+                  {{ guardandoCategoria ? 'Guardando...' : 'Crear servicio' }}
                 </button>
                 <button type="button" class="btn btn-secondary btn-sm" (click)="cancelarFormCategoria()">
                   Cancelar

@@ -8,17 +8,18 @@ import { forkJoin, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { AdminTalleresComponent } from './talleres/admin-talleres.component';
 import { AdminGananciasComponent } from './ganancias/admin-ganancias.component';
+import { AdminServiciosComponent } from './servicios/admin-servicios.component';
 
 @Component({
   selector: 'app-dashboard-admin',
   standalone: true,
-  imports: [CommonModule, AdminTalleresComponent, AdminGananciasComponent],
+  imports: [CommonModule, AdminTalleresComponent, AdminGananciasComponent, AdminServiciosComponent],
   templateUrl: './dashboard-admin.component.html',
   styleUrl: './dashboard-admin.component.scss'
 })
 export class DashboardAdminComponent implements OnInit {
   currentUser: User | null = null;
-  vistaActual: 'inicio' | 'talleres' | 'ganancias' = 'inicio';
+  vistaActual: 'inicio' | 'talleres' | 'ganancias' | 'servicios' = 'inicio';
   statsLoading = false;
 
   stats = [
@@ -30,6 +31,7 @@ export class DashboardAdminComponent implements OnInit {
 
   quickActions = [
     { icon: '🏢', label: 'Gestionar Talleres', action: 'talleres' },
+    { icon: '🔧', label: 'Gestionar Servicios', action: 'servicios' },
     { icon: '📊', label: 'Reporte de Ganancias', action: 'ganancias' },
   ];
 
@@ -95,9 +97,10 @@ export class DashboardAdminComponent implements OnInit {
 
   handleAction(action: string): void {
     console.log('[DashboardAdmin] handleAction →', { action, vistaActual: this.vistaActual });
-    const mapa: Record<string, 'talleres' | 'ganancias'> = {
+    const mapa: Record<string, 'talleres' | 'ganancias' | 'servicios'> = {
       talleres: 'talleres',
       ganancias: 'ganancias',
+      servicios: 'servicios',
       workshops: 'talleres',
       reports: 'ganancias',
     };
