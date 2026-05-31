@@ -1,0 +1,53 @@
+<div class="shell-root">
+  <header class="shell-header">
+    <div class="shell-header-content">
+      <a class="shell-brand" routerLink="/dashboard/taller/inicio">Flujo Emergencia · Panel del taller</a>
+
+      <nav class="shell-nav">
+        <a routerLink="/dashboard/taller/inicio" routerLinkActive="activo" [routerLinkActiveOptions]="{exact:true}">Inicio</a>
+        <a routerLink="/dashboard/taller/solicitudes" routerLinkActive="activo">Solicitudes</a>
+        <a routerLink="/dashboard/taller/servicios" routerLinkActive="activo">Servicios</a>
+        <a routerLink="/dashboard/taller/cancelaciones" routerLinkActive="activo">Compensaciones</a>
+        <a routerLink="/dashboard/taller/kpis" routerLinkActive="activo">KPIs</a>
+        <a routerLink="/dashboard/taller/historial" routerLinkActive="activo">Historial</a>
+      </nav>
+
+      <div class="shell-actions">
+        <app-connection-badge />
+
+        <div class="notif-wrapper">
+          <button class="btn-notif" (click)="toggleNotificaciones()" title="Notificaciones" aria-label="Notificaciones">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            @if (notificacionesNoLeidas > 0) {
+              <span class="notif-badge">{{ notificacionesNoLeidas }}</span>
+            }
+          </button>
+          @if (mostrarNotificaciones) {
+            <div class="notif-panel">
+              <h4>Notificaciones</h4>
+              @if (notificaciones.length === 0) {
+                <p class="notif-empty">Sin notificaciones</p>
+              }
+              @for (n of notificaciones; track n.id_notificacion) {
+                <div class="notif-item" [class.no-leida]="!n.leido" (click)="marcarLeida(n.id_notificacion)">
+                  <strong>{{ n.titulo }}</strong>
+                  <p>{{ n.mensaje }}</p>
+                  <small>{{ n.created_at | date:'dd/MM HH:mm' }}</small>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell-content">
+    <router-outlet />
+  </main>
+</div>

@@ -1,0 +1,63 @@
+// Estilos del componente Dashboard Admin (usa tokens globales y los contenedores .stat-card, .action-card y .dashboard-*).
+:host {
+  display: block;
+}
+
+.dashboard-header {
+  .header-content h1 {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+}
+
+// Reemplaza el color de marca por defecto de las tarjetas de estadística por índigo en el contexto de administración.
+.stat-card {
+  &::before {
+    background: var(--indigo);
+  }
+
+  .stat-icon {
+    background: var(--indigo-soft);
+    color: var(--indigo);
+  }
+}
+
+.action-card {
+  .action-icon {
+    background: var(--indigo-soft);
+    color: var(--indigo);
+  }
+
+  &:hover {
+    border-color: rgba(55, 48, 163, 0.3);
+  }
+}
+
+// Sección de bienvenida.
+.welcome-section {
+  h2 {
+    font-size: 30px;
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: var(--ink-muted);
+    font-size: 15px;
+  }
+}
+
+.quick-actions {
+  margin-top: 28px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-header .header-content {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+
+    h1 {
+      font-size: 16px;
+    }
+  }
+}

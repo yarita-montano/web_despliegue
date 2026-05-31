@@ -1,0 +1,84 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <div class="header-content">
+      <h1>Flujo Emergencia · Administración</h1>
+      <div class="header-info">
+        <span class="user-name">{{ currentUser?.nombre }}</span>
+        <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-main">
+    <!-- Vista inicial -->
+    @if (vistaActual === 'inicio') {
+      <section class="welcome-section">
+        <h2>Bienvenido/a, {{ currentUser?.nombre }}!</h2>
+        <p>Control total de la plataforma de servicios vehiculares</p>
+      </section>
+
+      <section class="stats-section">
+        <div class="stats-grid">
+          @for (stat of stats; track stat.label) {
+            <div class="stat-card">
+              <span class="stat-icon">{{ stat.icon }}</span>
+              <p class="stat-label">{{ stat.label }}</p>
+              @if (statsLoading) {
+                <p class="stat-value">Cargando...</p>
+              } @else if (stat.format === 'currency') {
+                <p class="stat-value">{{ stat.value | currency }}</p>
+              } @else {
+                <p class="stat-value">{{ stat.value | number: '1.0-0' }}</p>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="quick-actions">
+        <h3>Acciones de administración</h3>
+        <div class="actions-grid">
+          @for (action of quickActions; track action.action) {
+            <button
+              class="action-card"
+              (click)="handleAction(action.action)"
+            >
+              <span class="action-icon">{{ action.icon }}</span>
+              <span class="action-label">{{ action.label }}</span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Vista talleres -->
+    @if (vistaActual === 'talleres') {
+      <nav class="nav-volver">
+        <button (click)="irAInicio()" class="btn-volver">
+          ← Volver al inicio
+        </button>
+      </nav>
+      <app-admin-talleres></app-admin-talleres>
+    }
+
+    <!-- Vista ganancias -->
+    @if (vistaActual === 'ganancias') {
+      <nav class="nav-volver">
+        <button (click)="irAInicio()" class="btn-volver">
+          ← Volver al inicio
+        </button>
+      </nav>
+      <app-admin-ganancias></app-admin-ganancias>
+    }
+
+    <!-- Vista servicios -->
+    @if (vistaActual === 'servicios') {
+      <nav class="nav-volver">
+        <button (click)="irAInicio()" class="btn-volver">
+          ← Volver al inicio
+        </button>
+      </nav>
+      <app-admin-servicios></app-admin-servicios>
+    }
+  </main>
+</div>

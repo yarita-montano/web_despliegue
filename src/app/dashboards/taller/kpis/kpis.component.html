@@ -1,0 +1,101 @@
+<div class="kpis-page">
+  <header>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <button class="btn-back" (click)="volver()">← Volver</button>
+      <h1 style="margin:0">Indicadores de gestion</h1>
+    </div>
+    <div class="filtros">
+      <label>Desde:</label>
+      <input type="date" [(ngModel)]="desde">
+      <label>Hasta:</label>
+      <input type="date" [(ngModel)]="hasta">
+      <button class="btn-primary" (click)="cargar()" [disabled]="cargando">
+        {{ cargando ? 'Cargando...' : 'Actualizar' }}
+      </button>
+    </div>
+  </header>
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  @if (data) {
+    <div class="grid">
+      <div class="kpi">
+        <div class="big">{{ data.tiempo_promedio_asignacion_min | number:'1.0-1' }}</div>
+        <div class="unit">min</div>
+        <div class="label">Tiempo promedio de asignacion</div>
+        <div class="hint">desde reporte hasta aceptacion del taller</div>
+      </div>
+
+      <div class="kpi">
+        <div class="big">{{ data.tiempo_promedio_llegada_min | number:'1.0-1' }}</div>
+        <div class="unit">min</div>
+        <div class="label">Tiempo promedio de llegada</div>
+        <div class="hint">desde aceptacion hasta llegada al sitio</div>
+      </div>
+
+      <div class="kpi">
+        <div class="big">{{ data.casos_cancelados }}</div>
+        <div class="unit">casos</div>
+        <div class="label">Casos cancelados</div>
+        <div class="hint">incidentes cancelados en el rango</div>
+      </div>
+
+      @if (data.sla_cumplimiento) {
+        <div class="kpi">
+          <div class="big">{{ data.sla_cumplimiento.porcentaje | number:'1.0-1' }}%</div>
+          <div class="unit">SLA &le; {{ data.sla_cumplimiento.sla_minutos }} min</div>
+          <div class="label">Cumplimiento SLA</div>
+          <div class="hint">
+            {{ data.sla_cumplimiento.cumplen_sla }} de
+            {{ data.sla_cumplimiento.total_completadas }} servicios completados
+          </div>
+        </div>
+      }
+
+      <div class="card-grande">
+        <h3>Incidentes por tipo</h3>
+        <div class="chart-container">
+          <canvas #chartCat></canvas>
+        </div>
+        @if (data.incidentes_por_categoria.length === 0) {
+          <div class="empty">No hay incidentes en el rango seleccionado.</div>
+        }
+      </div>
+
+      <div class="card-grande">
+        <h3>Zonas con mas incidentes</h3>
+        @if (data.zonas_mas_incidentes.length > 0) {
+          <table class="zonas-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Latitud</th>
+                <th>Longitud</th>
+                <th>Total</th>
+                <th>Mapa</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (z of data.zonas_mas_incidentes; track $index) {
+                <tr>
+                  <td>{{ $index + 1 }}</td>
+                  <td>{{ z.lat | number:'1.2-4' }}</td>
+                  <td>{{ z.lng | number:'1.2-4' }}</td>
+                  <td><strong>{{ z.total }}</strong></td>
+                  <td>
+                    <a [href]="'https://www.google.com/maps?q=' + z.lat + ',' + z.lng"
+                       target="_blank" rel="noopener">Ver</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <div class="empty">No hay incidentes geolocalizados en el rango.</div>
+        }
+      </div>
+    </div>
+  }
+</div>

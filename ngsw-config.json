@@ -1,0 +1,63 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app-shell",
+      "installMode": "prefetch",
+      "resources": {
+        "files": [
+          "/favicon.ico",
+          "/index.html",
+          "/manifest.webmanifest",
+          "/*.css",
+          "/*.js"
+        ]
+      }
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/assets/**",
+          "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
+        ]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "api-catalogos",
+      "urls": [
+        "/categorias",
+        "/plans",
+        "/incidencias/categorias",
+        "/incidencias/prioridades"
+      ],
+      "cacheConfig": {
+        "maxSize": 50,
+        "maxAge": "1d",
+        "strategy": "freshness",
+        "timeout": "2s"
+      }
+    },
+    {
+      "name": "api-taller-readonly",
+      "urls": [
+        "/tenants/me",
+        "/talleres/mi-taller",
+        "/talleres/mi-taller/**",
+        "/incidencias/**",
+        "/tecnicos/talleres-publicos"
+      ],
+      "cacheConfig": {
+        "maxSize": 200,
+        "maxAge": "1h",
+        "strategy": "freshness",
+        "timeout": "3s"
+      }
+    }
+  ]
+}

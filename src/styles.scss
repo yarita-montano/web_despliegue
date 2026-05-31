@@ -1,0 +1,50 @@
+/* Estilos globales de la web Flujo Emergencia */
+@use 'leaflet/dist/leaflet.css';
+@use 'styles/tokens';
+@use 'styles/base';
+@use 'styles/components';
+
+/* Marcador de pin personalizado para Leaflet */
+.pin-taller-marker {
+  background: transparent;
+  border: none;
+}
+
+.pin-taller-marker .pin-wrap {
+  position: relative;
+  width: 36px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-2px);
+}
+
+.pin-taller-marker .pin-drop {
+  position: absolute;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(180deg, #b11d27 0%, #7c1419 100%);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 8px 16px rgba(177, 29, 39, 0.28);
+}
+
+.pin-taller-marker .pin-drop::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  background: white;
+  border-radius: 50%;
+}
+
+.pin-taller-marker .pin-circle {
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  background: rgba(24, 24, 27, 0.18);
+  border-radius: 50%;
+  filter: blur(1px);
+}

@@ -1,0 +1,113 @@
+// Tokens de diseño — Flujo Emergencia.
+// Fuente única de verdad para color, espaciado, radios, tipografía y sombras.
+
+:root {
+  // Marca
+  --brand: #b11d27;
+  --brand-dark: #7c1419;
+  --brand-darker: #4a0f14;
+  --brand-soft: #fce7e9;
+  --brand-ink: #4a0f14;
+
+  // Tinta y texto
+  --ink: #18181b;
+  --ink-subtle: #52525b;
+  --ink-muted: #8a8a93;
+  --ink-faint: #b4b4bc;
+
+  // Superficies
+  --surface: #ffffff;
+  --surface-muted: #fafaf7;
+  --background: #f4f2ed;
+  --overlay: #f0ede6;
+
+  // Bordes
+  --border: #e7e4dd;
+  --border-subtle: #f0ede6;
+  --border-strong: #d6d3cb;
+
+  // Acentos
+  --amber: #b45309;
+  --amber-soft: #fef3c7;
+  --amber-ink: #7c2d12;
+  --forest: #15803d;
+  --forest-soft: #dcfce7;
+  --forest-ink: #14532d;
+  --slate: #1f2937;
+  --slate-soft: #e5e7eb;
+  --slate-ink: #0b1220;
+  --indigo: #3730a3;
+  --indigo-soft: #e0e7ff;
+  --indigo-ink: #1e1b4b;
+
+  // Estados de error, éxito y advertencia
+  --danger: var(--brand);
+  --danger-soft: var(--brand-soft);
+  --danger-ink: var(--brand-ink);
+  --success: var(--forest);
+  --success-soft: var(--forest-soft);
+  --success-ink: var(--forest-ink);
+  --warning: var(--amber);
+  --warning-soft: var(--amber-soft);
+  --warning-ink: var(--amber-ink);
+
+  // Degradados
+  --grad-brand: linear-gradient(135deg, #b11d27 0%, #7c1419 100%);
+  --grad-brand-deep: linear-gradient(
+    135deg,
+    #b11d27 0%,
+    #7c1419 55%,
+    #4a0f14 100%
+  );
+  --grad-dusk: linear-gradient(180deg, #1f2937 0%, #0b1220 100%);
+
+  // Escala de espaciado (rejilla de 8 puntos)
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 56px;
+  --space-10: 72px;
+
+  // Radios
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-pill: 999px;
+
+  // Sombras suaves de varias capas
+  --shadow-xs: 0 1px 2px rgba(24, 24, 27, 0.04);
+  --shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.04),
+    0 1px 4px rgba(24, 24, 27, 0.04);
+  --shadow-md: 0 2px 4px rgba(24, 24, 27, 0.03),
+    0 6px 16px rgba(24, 24, 27, 0.06);
+  --shadow-lg: 0 4px 8px rgba(24, 24, 27, 0.04),
+    0 16px 32px rgba(24, 24, 27, 0.08);
+  --shadow-xl: 0 6px 12px rgba(24, 24, 27, 0.05),
+    0 24px 48px rgba(24, 24, 27, 0.12);
+  --shadow-brand: 0 12px 24px rgba(177, 29, 39, 0.24);
+  --shadow-brand-sm: 0 4px 12px rgba(177, 29, 39, 0.18);
+
+  // Tipografía
+  --font-sans: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular,
+    Menlo, monospace;
+
+  // Movimiento
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.4, 1.4, 0.5, 1);
+  --duration-fast: 120ms;
+  --duration: 220ms;
+  --duration-slow: 380ms;
+
+  // Disposición
+  --container-max: 1240px;
+  --header-h: 72px;
+}

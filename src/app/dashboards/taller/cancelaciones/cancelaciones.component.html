@@ -1,0 +1,125 @@
+<div class="cancelaciones-page">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="btn-back" (click)="volver()">← Volver</button>
+      <div>
+        <h1>Cancelaciones y compensaciones</h1>
+        <p class="hint">Revisa las asignaciones canceladas y el monto pendiente.</p>
+      </div>
+    </div>
+    <button class="btn-primary" (click)="cargar()" [disabled]="cargando">Refrescar</button>
+  </div>
+
+  <section class="config">
+    <h2>Mi tarifa de traslado</h2>
+    <p class="hint">
+      Monto base que recibes cuando un cliente cancela (en USD).
+    </p>
+    <div class="form-tarifa">
+      <input type="number" [(ngModel)]="nuevaTarifa" min="0" max="1000">
+      <span>USD</span>
+      <button
+        class="btn-secondary"
+        (click)="guardarTarifa()"
+        [disabled]="guardandoTarifa || nuevaTarifa === tarifaActual"
+      >
+        {{ guardandoTarifa ? 'Guardando...' : 'Guardar' }}
+      </button>
+      @if (msgTarifa) {
+        <span class="msg">{{ msgTarifa }}</span>
+      }
+    </div>
+  </section>
+
+  <section class="config">
+    <h2>Porcentajes de compensacion</h2>
+    <p class="hint">
+      Porcentaje de la tarifa de traslado que se cobra al cliente segun en
+      que estado estaba la asignacion al cancelar.
+    </p>
+    <div class="pct-grid">
+      <div class="pct-fila">
+        <label>Pendiente</label>
+        <input type="number" [(ngModel)]="pctConfig.pct_cancel_pendiente" min="0" max="100">
+        <span>%</span>
+      </div>
+      <div class="pct-fila">
+        <label>Aceptada</label>
+        <input type="number" [(ngModel)]="pctConfig.pct_cancel_aceptada" min="0" max="100">
+        <span>%</span>
+      </div>
+      <div class="pct-fila">
+        <label>En camino / Llego</label>
+        <input type="number" [(ngModel)]="pctConfig.pct_cancel_en_camino" min="0" max="100">
+        <span>%</span>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <button
+        class="btn-secondary"
+        (click)="guardarPorcentajes()"
+        [disabled]="guardandoPct"
+      >
+        {{ guardandoPct ? 'Guardando...' : 'Guardar porcentajes' }}
+      </button>
+      @if (msgPct) {
+        <span class="msg" style="margin-left:8px">{{ msgPct }}</span>
+      }
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="kpi">
+      <div class="big">{{ totalCancelaciones }}</div>
+      <div>Cancelaciones</div>
+    </div>
+    <div class="kpi destacado">
+      <div class="big">${{ totalPendiente | number:'1.2-2' }}</div>
+      <div>Pendiente de cobro</div>
+    </div>
+  </section>
+
+  <h2>Historial</h2>
+  @if (cargando) {
+    <p class="loading">Cargando...</p>
+  }
+
+  @if (!cargando) {
+    <div class="tabla-card">
+      <table class="historial">
+        <thead>
+          <tr>
+            <th>Asignacion</th>
+            <th>Incidente</th>
+            <th>Cancelada</th>
+            <th>Motivo</th>
+            <th>Compensacion</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of lista; track a.id_asignacion) {
+            <tr>
+              <td>#{{ a.id_asignacion }}</td>
+              <td>#{{ a.id_incidente }}</td>
+              <td>{{ a.cancelada_at | date:'short' }}</td>
+              <td class="motivo">{{ a.motivo_cancelacion }}</td>
+              <td>
+                <strong>${{ a.compensacion_monto | number:'1.2-2' }}</strong>
+              </td>
+              <td>
+                @if (a.compensacion_pagada) {
+                  <span class="badge ok">Pagada</span>
+                } @else if (!a.compensacion_pagada && a.compensacion_monto) {
+                  <span class="badge pending">Pendiente</span>
+                } @else {
+                  <span class="muted">$0</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

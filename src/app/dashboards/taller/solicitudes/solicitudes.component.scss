@@ -1,0 +1,361 @@
+.solicitudes-container {
+  padding: 28px 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.solicitudes-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  h1 {
+    flex: 1;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .badge-live {
+    padding: 6px 12px;
+    background: var(--danger-soft);
+    color: var(--danger-ink);
+    border: 1px solid rgba(177, 29, 39, 0.3);
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    animation: live-pulse 1.6s ease-in-out infinite;
+  }
+
+  .btn-back,
+  .btn-refresh {
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-subtle);
+    transition: background var(--duration-fast), color var(--duration-fast), border-color var(--duration-fast);
+
+    &:hover:not(:disabled) {
+      background: var(--overlay);
+      color: var(--ink);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Pastillas de filtro por estado
+.filtros {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+
+  .filtro-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-subtle);
+    transition: background var(--duration-fast), color var(--duration-fast), border-color var(--duration-fast);
+
+    &:hover {
+      background: var(--overlay);
+      color: var(--ink);
+      border-color: var(--border-strong);
+    }
+
+    &.activo {
+      background: var(--brand-soft);
+      color: var(--brand-ink);
+      border-color: rgba(177, 29, 39, 0.3);
+    }
+
+    &.filtro-live.activo {
+      background: var(--danger-soft);
+      color: var(--danger-ink);
+      border-color: rgba(177, 29, 39, 0.4);
+    }
+
+    .count {
+      margin-left: 4px;
+      opacity: 0.8;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}
+
+// Alertas
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+
+  &.alert-error {
+    background: var(--danger-soft);
+    color: var(--danger-ink);
+    border: 1px solid rgba(177, 29, 39, 0.2);
+  }
+}
+
+// Estados de carga y vacío
+.loading,
+.empty {
+  padding: 48px;
+  text-align: center;
+  color: var(--ink-muted);
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+// Cuadrícula de tarjetas
+.solicitudes-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+.solicitud-card {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  cursor: pointer;
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast), transform var(--duration-fast);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--brand);
+    opacity: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    transition: opacity var(--duration-fast);
+  }
+
+  &:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  .card-header {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  .card-categoria {
+    margin: 0 0 6px;
+    color: var(--ink-muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .card-resumen {
+    margin: 0 0 12px;
+    color: var(--ink-subtle);
+    font-size: 13.5px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+
+  .eta {
+    font-weight: 600;
+  }
+}
+
+// Insignias
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid transparent;
+
+  &::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.7;
+  }
+
+  &.badge-pendiente  { background: var(--warning-soft);  color: var(--warning-ink);  border-color: rgba(180,83,9,0.2); }
+  &.badge-aceptada   { background: var(--success-soft);  color: var(--success-ink);  border-color: rgba(21,128,61,0.2); }
+  &.badge-rechazada  { background: var(--danger-soft);   color: var(--danger-ink);   border-color: rgba(177,29,39,0.2); }
+  &.badge-en_camino  { background: var(--indigo-soft);   color: var(--indigo-ink);   border-color: rgba(55,48,163,0.2); }
+  &.badge-completada { background: var(--slate-soft);    color: var(--slate-ink);    border-color: rgba(31,41,55,0.15); }
+
+  &.badge-prioridad {
+    &::before { display: none; }
+    &.prioridad-alta  { background: var(--danger-soft);  color: var(--danger-ink);  border-color: rgba(177,29,39,0.2); }
+    &.prioridad-media { background: var(--warning-soft); color: var(--warning-ink); border-color: rgba(180,83,9,0.2); }
+    &.prioridad-baja  { background: var(--success-soft); color: var(--success-ink); border-color: rgba(21,128,61,0.2); }
+  }
+
+  &.badge-live-card {
+    background: var(--danger-soft);
+    color: var(--danger-ink);
+    border-color: rgba(177, 29, 39, 0.3);
+    animation: live-pulse 1.6s ease-in-out infinite;
+    &::before { display: none; }
+  }
+}
+
+// Tarjetas de incidentes en vivo
+.solicitud-card.card-live {
+  cursor: default;
+  border-color: rgba(177, 29, 39, 0.25);
+
+  &:hover {
+    transform: none;
+    border-color: rgba(177, 29, 39, 0.4);
+  }
+
+  &::before {
+    background: var(--danger);
+    opacity: 1;
+  }
+
+  &.tomada {
+    opacity: 0.55;
+    border-color: var(--border);
+    &::before { background: var(--ink-muted); }
+  }
+
+  &.mia {
+    border-color: rgba(21, 128, 61, 0.4);
+    &::before { background: var(--success); }
+  }
+
+  .card-time {
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .link-ubicacion {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--brand-ink);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
+
+    &:hover { color: var(--brand); }
+  }
+
+  .card-acciones {
+    margin-top: 8px;
+  }
+
+  .btn-aceptar {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--brand);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background var(--duration-fast), transform var(--duration-fast);
+
+    &:hover:not(:disabled) {
+      background: var(--brand-strong, var(--brand));
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .status {
+    padding: 8px 10px;
+    border-radius: var(--radius-md);
+    font-size: 12.5px;
+    font-weight: 600;
+    text-align: center;
+
+    &.muted {
+      background: var(--overlay);
+      color: var(--ink-muted);
+    }
+
+    &.ok {
+      background: var(--success-soft);
+      color: var(--success-ink);
+    }
+
+    &.error {
+      background: var(--danger-soft);
+      color: var(--danger-ink);
+    }
+  }
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}

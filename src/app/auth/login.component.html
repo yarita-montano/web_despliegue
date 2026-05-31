@@ -1,0 +1,154 @@
+<div class="login-shell">
+  <!-- Panel de marca (izquierda) -->
+  <aside class="brand-pane">
+    <div class="brand-pane__inner">
+      <div class="brandmark">
+        <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="28" cy="28" r="26" fill="rgba(255,255,255,0.10)" />
+          <circle cx="28" cy="28" r="25" stroke="rgba(255,255,255,0.22)" stroke-width="1.4" />
+          <path
+            d="M31 11 L17.5 31 L26 31 L23 45 L40 23 L31 23 Z"
+            fill="white"
+          />
+        </svg>
+        <span class="brandmark__wordmark">Flujo Emergencia</span>
+      </div>
+
+      <h1 class="brand-pane__title">
+        Asistencia<br />vehicular cuando<br />más la necesitas.
+      </h1>
+
+      <p class="brand-pane__desc">
+        Coordina solicitudes, técnicos y pagos desde un solo panel.
+        Diseñado para talleres profesionales.
+      </p>
+
+      <div class="brand-pane__stats">
+        <div>
+          <span class="stat__value">24/7</span>
+          <span class="stat__label">Disponibilidad</span>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <span class="stat__value">&lt; 15 min</span>
+          <span class="stat__label">Asignación promedio</span>
+        </div>
+      </div>
+
+      <p class="brand-pane__footer">FLUJO EMERGENCIA · PLATAFORMA DE ASISTENCIA</p>
+    </div>
+  </aside>
+
+  <!-- Panel del formulario (derecha) -->
+  <main class="form-pane">
+    <div class="form-pane__inner">
+      <header class="form-pane__head">
+        @if (portal() === 'tenant') {
+          <span class="overline">Portal del taller</span>
+          @if (tenantNombre()) {
+            <h2>{{ tenantNombre() }}</h2>
+            <p>Inicia sesión en el panel de tu taller.</p>
+          } @else if (tenantNoEncontrado()) {
+            <h2>Taller no encontrado</h2>
+            <p>El subdominio «{{ tenantSlug() }}» no corresponde a ningún taller registrado.</p>
+          } @else {
+            <h2>{{ tenantSlug() }}</h2>
+            <p>Cargando datos del taller…</p>
+          }
+        } @else {
+          <span class="overline">Acceso administrador</span>
+          <h2>Panel de administración</h2>
+          <p>Inicia sesión con tu cuenta de administrador.</p>
+        }
+      </header>
+
+      @if (error()) {
+        <div class="alert alert-error">
+          <span>{{ error() }}</span>
+          <button type="button" class="close-btn" (click)="clearError()" aria-label="Cerrar">&times;</button>
+        </div>
+      }
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="correo@empresa.com"
+            class="form-control"
+            autocomplete="email"
+          />
+          @if (loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched) {
+            <span class="error-message">El correo es requerido</span>
+          }
+          @if (loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched) {
+            <span class="error-message">El correo no es válido</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            placeholder="••••••••"
+            class="form-control"
+            autocomplete="current-password"
+          />
+          @if (loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched) {
+            <span class="error-message">La contraseña es requerida</span>
+          }
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="loginForm.invalid || loading() || (portal() === 'tenant' && tenantNoEncontrado())"
+          class="btn btn-primary btn-block btn-large"
+        >
+          @if (loading()) {
+            <span class="spinner"></span>
+            <span>Verificando…</span>
+          } @else {
+            <span>Entrar</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          }
+        </button>
+      </form>
+
+      <div class="demo-block">
+        <p class="overline demo-block__title">Cuentas de prueba</p>
+        <div class="credentials-list">
+          @for (role of roles; track role.tipo) {
+            <button
+              type="button"
+              class="credential-btn"
+              (click)="setCredentials(role)"
+              [disabled]="loading()"
+            >
+              <span class="credential-btn__icon" [attr.data-tipo]="role.tipo">
+                @switch (role.tipo) {
+                  @case ('taller') {
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6M9 11h.01M15 11h.01"/></svg>
+                  }
+                  @case ('admin') {
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 .5-5.5 4.5L18 21l-6-3.5L6 21l1.5-7L2 9.5 9 9z"/></svg>
+                  }
+                }
+              </span>
+              <span class="credential-btn__body">
+                <span class="role-name">{{ role.name }}</span>
+                <span class="role-email">{{ role.email }}</span>
+              </span>
+              <span class="credential-btn__chev" aria-hidden="true">→</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

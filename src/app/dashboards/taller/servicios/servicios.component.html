@@ -1,0 +1,112 @@
+<div class="servicios-page">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="btn-back" (click)="volver()">← Volver</button>
+      <div>
+        <h1>Mis servicios</h1>
+        <p class="hint">
+          Marca las categorias que atiendes. La tarifa base es <strong>referencial</strong>:
+          ayuda al cliente a estimar antes de salir y luego el tecnico puede ajustar
+          al cobrar segun los gastos reales del servicio.
+        </p>
+      </div>
+    </div>
+    <button class="btn-primary" (click)="guardar()" [disabled]="guardando || cargando">
+      {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+    </button>
+  </div>
+
+  @if (cargando) {
+    <p class="loading">Cargando...</p>
+  }
+
+  @if (error) {
+    <div class="alert error">{{ error }}</div>
+  }
+
+  @if (!cargando && !error) {
+    <div class="tarifa-km-card">
+      <label for="tarifa-km">Tarifa por km recorrido (USD)</label>
+      <p class="muted small">
+        Se suma automaticamente a cada cotizacion segun la distancia GPS al cliente.
+        Ej: tarifa $2/km, cliente a 5 km → traslado $10.
+      </p>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+        <input
+          id="tarifa-km"
+          type="number"
+          [(ngModel)]="tarifaKm"
+          min="0"
+          step="0.10"
+          style="width:120px"
+        >
+        <button
+          class="btn-secondary"
+          (click)="guardarTarifaKm()"
+          [disabled]="guardandoTarifa"
+        >
+          {{ guardandoTarifa ? 'Guardando...' : 'Guardar tarifa' }}
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (!cargando && !error && filas.length === 0) {
+    <div class="empty">No hay categorias de servicio configuradas en el sistema.</div>
+  }
+
+  @if (!cargando && !error && filas.length > 0) {
+    <div class="tabla-card">
+      <table class="servicios-table">
+        <thead>
+          <tr>
+            <th>Atiende</th>
+            <th>Categoria</th>
+            <th>Tarifa base (USD)</th>
+            <th>Tiempo reparacion (min)</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (f of filas; track f.categoria.id_categoria) {
+            <tr>
+              <td>
+                <input type="checkbox" [(ngModel)]="f.activo">
+              </td>
+              <td>
+                <strong>{{ f.categoria.nombre }}</strong>
+                <div class="muted">{{ f.categoria.descripcion }}</div>
+              </td>
+              <td>
+                <input
+                  type="number"
+                  [(ngModel)]="f.tarifa_base"
+                  [disabled]="!f.activo"
+                  min="0"
+                  step="0.01"
+                  placeholder="0"
+                >
+              </td>
+              <td>
+                <input
+                  type="number"
+                  [(ngModel)]="f.tiempo_estimado_min"
+                  [disabled]="!f.activo"
+                  min="0"
+                  step="15"
+                  placeholder="ej: 60"
+                  style="width:90px"
+                >
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <div class="acciones">
+    @if (mensaje) {
+      <span class="ok">{{ mensaje }}</span>
+    }
+  </div>
+</div>

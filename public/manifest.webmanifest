@@ -1,0 +1,17 @@
+{
+  "name": "Yary — Panel del Taller",
+  "short_name": "Yary",
+  "theme_color": "#dc3545",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "./",
+  "start_url": "./",
+  "description": "Panel de gestión de talleres mecánicos — Yary",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

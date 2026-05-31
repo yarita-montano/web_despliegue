@@ -1,0 +1,131 @@
+<div class="solicitudes-container">
+  <header class="solicitudes-header">
+    <button class="btn-back" (click)="volver()">← Volver</button>
+    <h1>📋 Solicitudes del Taller</h1>
+    @if (filtroEstado() !== 'en_vivo') {
+      <button class="btn-refresh" (click)="cargarSolicitudes()" [disabled]="cargando()">
+        🔄 Refrescar
+      </button>
+    } @else {
+      <span class="badge-live">● En vivo</span>
+    }
+  </header>
+
+  <nav class="filtros">
+    @for (filtro of filtrosDisponibles; track filtro) {
+      <button
+        class="filtro-btn"
+        [class.activo]="filtroEstado() === filtro"
+        [class.filtro-live]="filtro === 'en_vivo'"
+        (click)="cambiarFiltro(filtro)"
+      >
+        {{ etiquetaFiltro(filtro) }}
+        @if (filtro === 'en_vivo' && enVivo().length > 0) {
+          <span class="count">({{ enVivo().length }})</span>
+        }
+      </button>
+    }
+  </nav>
+
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+
+  @if (filtroEstado() === 'en_vivo') {
+    @if (enVivo().length === 0) {
+      <div class="empty">
+        <p>Esperando emergencias en tiempo real…</p>
+        <small>Los incidentes nuevos aparecerán aquí automáticamente.</small>
+      </div>
+    } @else {
+      <div class="solicitudes-list">
+        @for (e of enVivo(); track e.id_incidente) {
+          <div class="solicitud-card card-live"
+               [class.tomada]="e.tomado && !e.mio"
+               [class.mia]="e.mio">
+            <div class="card-header">
+              <span class="badge badge-live-card">🔴 En vivo</span>
+              <span class="card-time">{{ e.created_at | date:'shortTime' }}</span>
+            </div>
+
+            <h3 class="card-title">Incidente #{{ e.id_incidente }}</h3>
+
+            <p class="card-resumen">
+              {{ e.resumen_ia || e.descripcion_usuario || 'Sin descripción' }}
+            </p>
+
+            <button class="link-ubicacion" (click)="abrirEnMaps(e)">
+              📍 {{ e.latitud | number:'1.4-4' }}, {{ e.longitud | number:'1.4-4' }}
+            </button>
+
+            <div class="card-acciones">
+              @if (!e.tomado) {
+                <button
+                  class="btn-aceptar"
+                  (click)="aceptarIncidente(e)"
+                  [disabled]="e.aceptando"
+                >
+                  {{ e.aceptando ? 'Cargando…' : 'VER INFORMACIÓN' }}
+                </button>
+              }
+
+              @if (e.tomado && !e.mio) {
+                <div class="status muted">Ya fue tomado por otro taller</div>
+              }
+
+              @if (e.error) {
+                <div class="status error">{{ e.error }}</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    @if (cargando()) {
+      <div class="loading">Cargando solicitudes…</div>
+    } @else if (solicitudes().length === 0) {
+      <div class="empty">
+        <p>No hay solicitudes en estado "{{ filtroEstado() }}"</p>
+      </div>
+    } @else {
+      <div class="solicitudes-list">
+        @for (s of solicitudes(); track s.id_asignacion) {
+          <div class="solicitud-card" (click)="verDetalle(s)">
+            <div class="card-header">
+              <span class="badge badge-{{ s.estado.nombre }}">
+                {{ etiquetaEstado(s.estado.nombre) }}
+              </span>
+              @if (s.incidente.prioridad) {
+                <span class="badge badge-prioridad prioridad-{{ s.incidente.prioridad.nivel }}">
+                  {{ s.incidente.prioridad.nivel }}
+                </span>
+              }
+            </div>
+
+            <h3 class="card-title">
+              {{ s.incidente.usuario.nombre }} • {{ s.incidente.vehiculo.placa }}
+            </h3>
+
+            <p class="card-categoria">
+              {{ s.incidente.categoria?.nombre || 'Sin categoría' }}
+            </p>
+
+            <p class="card-resumen">
+              {{ s.incidente.resumen_ia || s.incidente.descripcion_usuario || '-' }}
+            </p>
+
+            <div class="card-footer">
+              @if (s.eta_minutos) {
+                <span class="eta">⏱️ ETA: {{ s.eta_minutos }} min</span>
+              }
+              <span class="fecha">
+                {{ s.incidente.created_at | date:'short' }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

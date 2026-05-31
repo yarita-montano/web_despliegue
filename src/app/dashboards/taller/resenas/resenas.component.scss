@@ -1,0 +1,201 @@
+.resenas-container {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.resenas-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  .btn-back {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #666;
+    padding: 0.5rem;
+
+    &:hover {
+      color: #000;
+    }
+  }
+
+  h1 {
+    font-size: 2rem;
+    margin: 0;
+    color: #333;
+  }
+}
+
+.resumen-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  color: white;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+
+  .resumen-stat {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+
+    .promedio-estrella {
+      font-size: 3rem;
+      font-weight: bold;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .resumen-texto {
+      h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+      }
+
+      p {
+        margin: 0 0 0.5rem 0;
+        opacity: 0.95;
+      }
+
+      .estrellas-resumen {
+        font-size: 1.5rem;
+        letter-spacing: 0.2rem;
+      }
+    }
+  }
+}
+
+.resenas-lista {
+  h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    color: #333;
+  }
+}
+
+.resena-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid #667eea;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  &.resena-excelente {
+    border-left-color: #00a86b;
+  }
+
+  &.resena-bueno {
+    border-left-color: #ffa500;
+  }
+
+  &.resena-mejorable {
+    border-left-color: #ff6b6b;
+  }
+
+  .resena-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    .estrellas {
+      font-size: 1.3rem;
+      letter-spacing: 0.1rem;
+      color: #ffa500;
+    }
+
+    .fecha {
+      color: #999;
+      font-size: 0.9rem;
+    }
+  }
+
+  .comentario {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #333;
+    font-style: italic;
+    margin: 1rem 0;
+    padding: 0.5rem 0 0 1rem;
+    border-left: 2px solid #e0e0e0;
+  }
+
+  .resena-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+
+    small {
+      color: #999;
+      font-size: 0.85rem;
+    }
+  }
+}
+
+.card.info-vacio {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 2px dashed #ddd;
+
+  .icono {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    color: #666;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    color: #999;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+  font-size: 1.1rem;
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+
+  &.alert-error {
+    background: #fee;
+    color: #c33;
+    border: 1px solid #fcc;
+  }
+}
+
+@media (max-width: 600px) {
+  .resumen-stat {
+    flex-direction: column;
+    text-align: center;
+
+    .promedio-estrella {
+      min-width: auto;
+    }
+  }
+
+  .resena-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
