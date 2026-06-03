@@ -33,6 +33,11 @@ export class OutboxService {
     try {
       const items = await localDB.outbox.orderBy('created_at').toArray();
       for (const item of items) {
+        // Timeout: un fetch colgado (red caida sin cerrar el socket) no debe
+        // bloquear el resto de la cola. Al expirar se aborta y cuenta como
+        // reintento (lo maneja el catch de abajo).
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 30000);
         try {
           const resp = await fetch(item.url, {
             method: item.method,
@@ -42,6 +47,7 @@ export class OutboxService {
               ...(item.headers || {}),
             },
             body: item.body ? JSON.stringify(item.body) : undefined,
+            signal: ctrl.signal,
           });
 
           if (resp.ok) {
@@ -63,6 +69,8 @@ export class OutboxService {
             attempts: item.attempts + 1,
             last_error: message,
           });
+        } finally {
+          clearTimeout(t);
         }
       }
     } finally {
