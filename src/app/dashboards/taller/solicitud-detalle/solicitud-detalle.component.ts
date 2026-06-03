@@ -43,7 +43,6 @@ export class SolicitudDetalleComponent implements OnInit, OnDestroy, AfterViewIn
   ) {
     this.formAceptar = this.fb.group({
       id_usuario: [null, [Validators.required]],
-      eta_minutos: [20, [Validators.required, Validators.min(1), Validators.max(600)]],
       nota: ['']
     });
     this.formRechazar = this.fb.group({
@@ -142,8 +141,7 @@ export class SolicitudDetalleComponent implements OnInit, OnDestroy, AfterViewIn
     this.procesando.set(true);
     const valores = this.formAceptar.value;
     const body: AceptarAsignacionBody = {
-      id_usuario: Number(valores.id_usuario),
-      eta_minutos: valores.eta_minutos
+      id_usuario: Number(valores.id_usuario)
     };
     if (valores.nota && valores.nota.trim()) {
       body.nota = valores.nota.trim();

@@ -186,16 +186,10 @@
             }
           </div>
 
-          <div class="form-group">
-            <label>ETA (minutos) *</label>
-            <input type="number" formControlName="eta_minutos" min="1" max="600" />
-            @if (formAceptar.get('eta_minutos')?.hasError('required') && formAceptar.get('eta_minutos')?.touched) {
-              <span class="error">El ETA es requerido</span>
-            }
-            @if (formAceptar.get('eta_minutos')?.hasError('min') || formAceptar.get('eta_minutos')?.hasError('max')) {
-              <span class="error">Debe estar entre 1 y 600 minutos</span>
-            }
-          </div>
+          <p class="info-eta">
+            El tiempo estimado de llegada (ETA) se calcula automáticamente según la
+            distancia al cliente; no es necesario ingresarlo.
+          </p>
 
           <div class="form-group">
             <label>Nota al cliente (opcional)</label>
