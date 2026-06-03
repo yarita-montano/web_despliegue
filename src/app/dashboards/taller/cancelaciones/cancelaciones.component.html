@@ -11,31 +11,11 @@
   </div>
 
   <section class="config">
-    <h2>Mi tarifa de traslado</h2>
-    <p class="hint">
-      Monto base que recibes cuando un cliente cancela (en USD).
-    </p>
-    <div class="form-tarifa">
-      <input type="number" [(ngModel)]="nuevaTarifa" min="0" max="1000">
-      <span>USD</span>
-      <button
-        class="btn-secondary"
-        (click)="guardarTarifa()"
-        [disabled]="guardandoTarifa || nuevaTarifa === tarifaActual"
-      >
-        {{ guardandoTarifa ? 'Guardando...' : 'Guardar' }}
-      </button>
-      @if (msgTarifa) {
-        <span class="msg">{{ msgTarifa }}</span>
-      }
-    </div>
-  </section>
-
-  <section class="config">
     <h2>Porcentajes de compensacion</h2>
     <p class="hint">
-      Porcentaje de la tarifa de traslado que se cobra al cliente segun en
-      que estado estaba la asignacion al cancelar.
+      Porcentaje de la cotizacion que vio el cliente (traslado + base de
+      reparacion) que se le cobra al cancelar, segun en que estado estaba la
+      asignacion.
     </p>
     <div class="pct-grid">
       <div class="pct-fila">

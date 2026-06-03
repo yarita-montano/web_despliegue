@@ -26,14 +26,6 @@ export class CancelacionesService {
     return this.http.get<AsignacionCancelada[]>('/talleres/mi-taller/asignaciones?estado=cancelada');
   }
 
-  actualizarTarifa(tarifa: number): Observable<unknown> {
-    return this.http.patch('/talleres/mi-taller/tarifa-traslado', { tarifa_traslado: tarifa });
-  }
-
-  miTaller(): Observable<{ tarifa_traslado: number }> {
-    return this.http.get<{ tarifa_traslado: number }>('/talleres/mi-taller');
-  }
-
   miTenant(): Observable<TenantCancelacionConfig> {
     return this.http.get<TenantCancelacionConfig>('/tenants/me');
   }

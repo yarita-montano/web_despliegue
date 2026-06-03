@@ -17,11 +17,7 @@ export class CancelacionesComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   lista: AsignacionCancelada[] = [];
-  tarifaActual = 0;
-  nuevaTarifa = 0;
   cargando = true;
-  guardandoTarifa = false;
-  msgTarifa: string | null = null;
 
   pctConfig: TenantCancelacionConfig = {
     pct_cancel_pendiente: 0,
@@ -53,14 +49,6 @@ export class CancelacionesComponent implements OnInit {
       },
     });
 
-    this.svc.miTaller().subscribe({
-      next: (t) => {
-        this.tarifaActual = Number(t.tarifa_traslado);
-        this.nuevaTarifa = this.tarifaActual;
-        this.cdr.detectChanges();
-      },
-    });
-
     this.svc.miTenant().subscribe({
       next: (t) => {
         this.pctConfig = {
@@ -73,27 +61,13 @@ export class CancelacionesComponent implements OnInit {
     });
   }
 
-  guardarTarifa(): void {
-    this.guardandoTarifa = true;
-    this.msgTarifa = null;
-    this.svc.actualizarTarifa(this.nuevaTarifa).subscribe({
-      next: () => {
-        this.tarifaActual = this.nuevaTarifa;
-        this.msgTarifa = 'Tarifa actualizada';
-        this.guardandoTarifa = false;
-        this.cdr.detectChanges();
-      },
-      error: (e) => {
-        this.msgTarifa = e?.error?.detail ?? e?.message ?? 'Error';
-        this.guardandoTarifa = false;
-        this.cdr.detectChanges();
-      },
-    });
-  }
-
   guardarPorcentajes(): void {
     const c = this.pctConfig;
-    if ([c.pct_cancel_pendiente, c.pct_cancel_aceptada, c.pct_cancel_en_camino].some(
+    if ([
+      c.pct_cancel_pendiente,
+      c.pct_cancel_aceptada,
+      c.pct_cancel_en_camino,
+    ].some(
       v => v < 0 || v > 100,
     )) {
       this.msgPct = 'Los porcentajes deben estar entre 0 y 100';
