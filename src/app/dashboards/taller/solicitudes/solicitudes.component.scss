@@ -359,3 +359,28 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.55; }
 }
+
+// Boton de mensaje (chat taller<->cliente) en cada tarjeta de solicitud.
+.card-msg {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.btn-mensaje {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--indigo-soft);
+  color: var(--indigo-ink);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-md);
+  transition: filter var(--duration-fast), border-color var(--duration-fast);
+
+  &:hover {
+    filter: brightness(0.96);
+    border-color: rgba(139, 92, 246, 0.5);
+  }
+}

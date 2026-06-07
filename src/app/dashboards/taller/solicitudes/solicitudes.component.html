@@ -123,6 +123,16 @@
                 {{ s.incidente.created_at | date:'short' }}
               </span>
             </div>
+
+            <div class="card-msg">
+              <button
+                class="btn-mensaje"
+                title="Abrir chat con el cliente"
+                (click)="abrirMensajes(s.incidente.id_incidente, $event)"
+              >
+                💬 Mensaje
+              </button>
+            </div>
           </div>
         }
       </div>

@@ -153,6 +153,13 @@ export class SolicitudesComponent implements OnInit, OnDestroy {
     this.router.navigate(['/dashboard/taller/solicitudes', asignacion.id_asignacion]);
   }
 
+  /** Abre el chat con el cliente. Disponible en todos los estados.
+   *  stopPropagation evita que tambien se dispare verDetalle de la tarjeta. */
+  abrirMensajes(idIncidente: number, evt: Event): void {
+    evt.stopPropagation();
+    this.router.navigate(['/dashboard/taller/mensajes', idIncidente]);
+  }
+
   volver(): void {
     this.router.navigate(['/dashboard/taller']);
   }
