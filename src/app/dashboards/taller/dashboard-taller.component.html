@@ -26,6 +26,20 @@
     </div>
   </section>
 
+  @if (tarifas) {
+    <section class="taller-info">
+      <div class="taller-card">
+        <h3>Tarifas</h3>
+        <div class="taller-details">
+          <div class="detail-row">
+            <span class="label">Comisión de la plataforma:</span>
+            <span class="value">{{ tarifas.comision_plataforma_pct }}%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
   @if (error) {
     <div class="alert alert-error">
       <span (click)="error = null" class="close-btn">&times;</span>

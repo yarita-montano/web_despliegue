@@ -1,4 +1,34 @@
 <div class="admin-talleres">
+  <!-- Comisión global de la plataforma -->
+  <section class="comision-card">
+    <div class="comision-card__info">
+      <h3>Comisión de la plataforma</h3>
+      <p class="comision-card__hint">
+        Porcentaje que la plataforma retiene de cada servicio. Aplica a todos los talleres.
+      </p>
+    </div>
+    <div class="comision-card__control">
+      <div class="comision-input">
+        <input
+          type="number"
+          [(ngModel)]="comisionPct"
+          min="0"
+          max="100"
+          step="1"
+          [disabled]="cargandoComision || guardandoComision"
+        >
+        <span class="comision-input__sufijo">%</span>
+      </div>
+      <button
+        class="btn btn-primary"
+        (click)="guardarComision()"
+        [disabled]="cargandoComision || guardandoComision"
+      >
+        {{ guardandoComision ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+  </section>
+
   <header class="section-header">
     <h2>📋 Gestión de Talleres</h2>
     <button class="btn btn-primary" (click)="abrirFormulario()" [disabled]="cargando">

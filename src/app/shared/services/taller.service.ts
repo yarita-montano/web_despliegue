@@ -59,6 +59,10 @@ export interface TecnicoUpdate {
   activo?: boolean;
 }
 
+export interface TarifasInfo {
+  comision_plataforma_pct: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -71,6 +75,11 @@ export class TallerService {
    */
   obtenerMiTaller(): Observable<Taller> {
     return this.http.get<Taller>('/talleres/mi-taller');
+  }
+
+  /** Tarifas vigentes (comision de la plataforma). */
+  obtenerTarifas(): Observable<TarifasInfo> {
+    return this.http.get<TarifasInfo>('/talleres/mi-taller/tarifas');
   }
 
   /**

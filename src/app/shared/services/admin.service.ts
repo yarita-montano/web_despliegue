@@ -94,6 +94,11 @@ interface GananciaPorTallerResponse {
   filtro_mes?: number | null;
 }
 
+// Configuracion global de la plataforma (backend: ConfiguracionResponse)
+export interface ConfiguracionGlobal {
+  comision_plataforma_pct: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -164,5 +169,17 @@ export class AdminService {
     return this.httpService
       .get<GananciaPorTallerResponse>(`${this.base}/ganancias/por-taller${qs ? '?' + qs : ''}`)
       .pipe(map(r => r.filas));
+  }
+
+  // Configuracion global
+
+  /** Configuracion global de la plataforma (comision). */
+  getConfiguracion(): Observable<ConfiguracionGlobal> {
+    return this.httpService.get<ConfiguracionGlobal>(`${this.base}/configuracion`);
+  }
+
+  /** Actualiza la configuracion global de la plataforma (comision). */
+  actualizarConfiguracion(body: Partial<ConfiguracionGlobal>): Observable<ConfiguracionGlobal> {
+    return this.httpService.patch<ConfiguracionGlobal>(`${this.base}/configuracion`, body);
   }
 }
