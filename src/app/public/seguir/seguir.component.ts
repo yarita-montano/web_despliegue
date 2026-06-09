@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription, interval, of } from 'rxjs';
-import { catchError, startWith, switchMap } from 'rxjs/operators';
+import { catchError, exhaustMap, startWith } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 
@@ -88,7 +88,7 @@ export class SeguirComponent implements OnInit, OnDestroy {
     this.sub = interval(5000)
       .pipe(
         startWith(0),
-        switchMap(() =>
+        exhaustMap(() =>
           this.http.get<Seguimiento>(url).pipe(
             catchError((err) => {
               this.online = navigator.onLine;
