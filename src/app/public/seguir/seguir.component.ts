@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
+  ChangeDetectorRef,
   Component,
   ElementRef,
   OnDestroy,
@@ -67,6 +68,7 @@ export class SeguirComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -114,6 +116,10 @@ export class SeguirComponent implements OnInit, OnDestroy {
           this.data = d;
           this.pintar(d);
         }
+        // Esta app necesita CD manual en componentes con polling (mismo patron
+        // que mensajes.component): sin esto, cargando/data cambian en memoria
+        // pero la vista (*ngIf) no se actualiza y queda en "Cargando".
+        this.cdr.detectChanges();
         if (this.terminal) {
           this.sub?.unsubscribe();
         }
