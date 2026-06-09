@@ -1,0 +1,241 @@
+<div class="kpis-container">
+  <header class="kpis-head">
+    <h2>Analitica operacional y KPIs</h2>
+    <p class="sub">Indicadores de toda la plataforma. Datos reales de la base de datos.</p>
+  </header>
+
+  <!-- Filtros -->
+  <section class="filtros card">
+    <div class="filtro">
+      <label>Taller</label>
+      <select [(ngModel)]="idTenantSel">
+        <option [ngValue]="null">Todos los talleres</option>
+        @for (t of porTaller; track t.id_taller) {
+          <option [ngValue]="t.id_tenant">{{ t.nombre }}</option>
+        }
+      </select>
+    </div>
+    <div class="filtro">
+      <label>Desde</label>
+      <input type="date" [(ngModel)]="desde" />
+    </div>
+    <div class="filtro">
+      <label>Hasta</label>
+      <input type="date" [(ngModel)]="hasta" />
+    </div>
+    <div class="filtro">
+      <label>Umbral SLA (min)</label>
+      <input type="number" [(ngModel)]="slaMin" min="1" max="1440" />
+    </div>
+    <button class="btn-aplicar" (click)="aplicarFiltros()" [disabled]="cargando">
+      {{ cargando ? 'Cargando...' : 'Aplicar' }}
+    </button>
+  </section>
+
+  @if (error) {
+    <div class="alert-error">{{ error }}</div>
+  }
+
+  @if (cargando) {
+    <div class="loading">Cargando KPIs...</div>
+  } @else if (resumen) {
+    <p class="scope">
+      Mostrando: <strong>{{ tallerSelNombre }}</strong>
+      · {{ resumen.desde | date:'mediumDate' }} a {{ resumen.hasta | date:'mediumDate' }}
+    </p>
+
+    <!-- Tarjetas resumen -->
+    <section class="cards">
+      <div class="card kpi-card">
+        <span class="kpi-ico">🕒</span>
+        <p class="kpi-label">Tiempo prom. de asignacion</p>
+        <p class="kpi-val">{{ resumen.tiempo_promedio_asignacion_min | number:'1.0-1' }} <small>min</small></p>
+        <p class="kpi-hint">Reporte → taller asignado</p>
+      </div>
+      <div class="card kpi-card">
+        <span class="kpi-ico">🚗</span>
+        <p class="kpi-label">Tiempo prom. de llegada</p>
+        <p class="kpi-val">{{ resumen.tiempo_promedio_llegada_min | number:'1.0-1' }} <small>min</small></p>
+        <p class="kpi-hint">Asignacion → llegada</p>
+      </div>
+      <div class="card kpi-card">
+        <span class="kpi-ico">📋</span>
+        <p class="kpi-label">Total de incidentes</p>
+        <p class="kpi-val">{{ resumen.total_incidentes | number:'1.0-0' }}</p>
+        <p class="kpi-hint">En el rango</p>
+      </div>
+      <div class="card kpi-card">
+        <span class="kpi-ico">🚫</span>
+        <p class="kpi-label">Casos cancelados</p>
+        <p class="kpi-val">{{ resumen.casos_cancelados | number:'1.0-0' }}</p>
+        <p class="kpi-hint">Canceladas / no atendidas</p>
+      </div>
+      <div class="card kpi-card sla">
+        <span class="kpi-ico">✅</span>
+        <p class="kpi-label">Cumplimiento SLA</p>
+        <p class="kpi-val">{{ (resumen.sla_cumplimiento?.porcentaje ?? 0) | number:'1.0-1' }}<small>%</small></p>
+        <p class="kpi-hint">
+          {{ resumen.sla_cumplimiento?.cumplen_sla ?? 0 }}/{{ resumen.sla_cumplimiento?.total_completadas ?? 0 }}
+          dentro de {{ resumen.sla_cumplimiento?.sla_minutos ?? slaMin }} min
+        </p>
+      </div>
+    </section>
+
+    <!-- Incidentes por tipo -->
+    <section class="card chart-card">
+      <div class="chart-head">
+        <h3>Incidentes por tipo</h3>
+        <div class="toggle">
+          <button [class.active]="tipoChartCat === 'bar'" (click)="setTipoChartCat('bar')">Barras</button>
+          <button [class.active]="tipoChartCat === 'doughnut'" (click)="setTipoChartCat('doughnut')">Dona</button>
+        </div>
+      </div>
+      @if (resumen.incidentes_por_categoria.length === 0) {
+        <p class="vacio">Sin incidentes en el rango.</p>
+      } @else {
+        <div class="chart-box"><canvas #chartCat></canvas></div>
+      }
+    </section>
+
+    @if (idTenantSel === null) {
+    <!-- Comparativa por taller (solo aplica viendo todos los talleres) -->
+    <section class="card chart-card">
+      <div class="chart-head">
+        <h3>Comparativa por taller</h3>
+        <div class="controls">
+          <select [(ngModel)]="metricaComp" (ngModelChange)="onMetricaChange()">
+            @for (m of metricas; track m.val) {
+              <option [ngValue]="m.val">{{ m.label }}</option>
+            }
+          </select>
+          <div class="toggle">
+            <button [class.active]="tipoChartComp === 'bar'" (click)="setTipoChartComp('bar')">Barras</button>
+            <button [class.active]="tipoChartComp === 'line'" (click)="setTipoChartComp('line')">Linea</button>
+          </div>
+        </div>
+      </div>
+      @if (porTaller.length === 0) {
+        <p class="vacio">No hay talleres con datos.</p>
+      } @else {
+        <div class="chart-box"><canvas #chartComp></canvas></div>
+
+        <div class="tabla-wrap">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>Taller</th>
+                <th>Asignacion (min)</th>
+                <th>Llegada (min)</th>
+                <th>Incidentes</th>
+                <th>Cancelados</th>
+                <th>SLA %</th>
+                <th>Completadas</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of porTaller; track r.id_taller) {
+                <tr>
+                  <td>{{ r.nombre }}</td>
+                  <td>{{ r.tiempo_asignacion_min | number:'1.0-1' }}</td>
+                  <td>{{ r.tiempo_llegada_min | number:'1.0-1' }}</td>
+                  <td>{{ r.total_incidentes }}</td>
+                  <td>{{ r.casos_cancelados }}</td>
+                  <td>{{ r.sla_porcentaje | number:'1.0-1' }}</td>
+                  <td>{{ r.completadas }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <!-- Talleres mas eficientes -->
+    <section class="card">
+      <h3>Talleres mas eficientes</h3>
+      <p class="sub">Ranking por rating, tasa de aceptacion y servicios completados.</p>
+      @if (ranking.length === 0) {
+        <p class="vacio">Sin datos de ranking.</p>
+      } @else {
+        <div class="tabla-wrap">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Taller</th>
+                <th>Rating</th>
+                <th>Completadas</th>
+                <th>Tasa aceptacion</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of ranking; track r.id_taller; let i = $index) {
+                <tr [class.top]="i === 0">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ r.nombre }}</td>
+                  <td>{{ r.rating_promedio | number:'1.1-2' }} ★</td>
+                  <td>{{ r.completadas }}</td>
+                  <td>{{ (r.tasa_aceptacion * 100) | number:'1.0-0' }}%</td>
+                  <td>{{ r.score | number:'1.2-3' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+    } @else {
+      <section class="card nota-taller">
+        <p>
+          📊 La <strong>comparativa entre talleres</strong> y el ranking
+          <strong>"Talleres más eficientes"</strong> solo aplican viendo
+          <strong>"Todos los talleres"</strong>. Los demás indicadores son del
+          taller seleccionado.
+        </p>
+      </section>
+    }
+
+    <!-- Zonas con mas incidentes -->
+    <section class="card">
+      <h3>Zonas con mas incidentes</h3>
+      <p class="sub">Agrupadas por ubicacion geografica aproximada (~1 km²).</p>
+      @if (resumen.zonas_mas_incidentes.length === 0) {
+        <p class="vacio">Sin datos de zonas.</p>
+      } @else {
+        <div class="tabla-wrap">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ubicacion</th>
+                <th>Incidentes</th>
+                <th>Mapa</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (z of resumen.zonas_mas_incidentes; track $index; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>
+                    @if (direccionZona(z)) {
+                      {{ direccionZona(z) }}
+                    } @else {
+                      <span class="muted">Zona {{ i + 1 }} (ubicando…)</span>
+                    }
+                  </td>
+                  <td>{{ z.total }}</td>
+                  <td>
+                    <a [href]="'https://www.google.com/maps?q=' + z.lat + ',' + z.lng" target="_blank" rel="noopener">
+                      🔗 Maps
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

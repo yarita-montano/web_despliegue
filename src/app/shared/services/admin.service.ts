@@ -99,6 +99,60 @@ export interface ConfiguracionGlobal {
   comision_plataforma_pct: number;
 }
 
+// KPIs (backend: kpi_schema)
+
+export interface KpiCategoria {
+  codigo: string | null;
+  nombre: string;
+  total: number;
+}
+
+export interface KpiZona {
+  lat: number;
+  lng: number;
+  total: number;
+}
+
+export interface KpiSla {
+  total_completadas: number;
+  cumplen_sla: number;
+  porcentaje: number;
+  sla_minutos: number;
+}
+
+export interface KpiResumenAdmin {
+  desde: string;
+  hasta: string;
+  tiempo_promedio_asignacion_min: number;
+  tiempo_promedio_llegada_min: number;
+  incidentes_por_categoria: KpiCategoria[];
+  casos_cancelados: number;
+  total_incidentes: number;
+  zonas_mas_incidentes: KpiZona[];
+  sla_cumplimiento: KpiSla | null;
+}
+
+export interface TallerKpiRow {
+  id_taller: number;
+  id_tenant: number | null;
+  nombre: string;
+  tiempo_asignacion_min: number;
+  tiempo_llegada_min: number;
+  total_incidentes: number;
+  casos_cancelados: number;
+  sla_porcentaje: number;
+  completadas: number;
+}
+
+export interface TallerRankingRow {
+  id_taller: number;
+  nombre: string;
+  rating_promedio: number;
+  completadas: number;
+  tasa_aceptacion: number;
+  score: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -181,5 +235,38 @@ export class AdminService {
   /** Actualiza la configuracion global de la plataforma (comision). */
   actualizarConfiguracion(body: Partial<ConfiguracionGlobal>): Observable<ConfiguracionGlobal> {
     return this.httpService.patch<ConfiguracionGlobal>(`${this.base}/configuracion`, body);
+  }
+
+  // KPIs (super-admin)
+
+  private kpiParams(desde: string, hasta: string, extra?: Record<string, string | number | null | undefined>): string {
+    const p = new URLSearchParams();
+    if (desde) p.append('desde', desde);
+    if (hasta) p.append('hasta', hasta);
+    if (extra) {
+      for (const [k, v] of Object.entries(extra)) {
+        if (v !== null && v !== undefined && v !== '') p.append(k, String(v));
+      }
+    }
+    const qs = p.toString();
+    return qs ? `?${qs}` : '';
+  }
+
+  /** KPIs consolidados (todos los talleres) o de un taller/tenant especifico. */
+  getKpisResumen(desde: string, hasta: string, idTenant?: number | null, slaMin: number = 60): Observable<KpiResumenAdmin> {
+    const qs = this.kpiParams(desde, hasta, { id_tenant: idTenant, sla_minutos: slaMin });
+    return this.httpService.get<KpiResumenAdmin>(`${this.base}/kpis/resumen${qs}`);
+  }
+
+  /** KPIs comparativos por cada taller. */
+  getKpisPorTaller(desde: string, hasta: string, slaMin: number = 60): Observable<TallerKpiRow[]> {
+    const qs = this.kpiParams(desde, hasta, { sla_minutos: slaMin });
+    return this.httpService.get<TallerKpiRow[]>(`${this.base}/kpis/por-taller${qs}`);
+  }
+
+  /** Ranking de talleres mas eficientes. */
+  getRankingTalleres(desde: string, hasta: string, limite: number = 10): Observable<TallerRankingRow[]> {
+    const qs = this.kpiParams(desde, hasta, { limite });
+    return this.httpService.get<TallerRankingRow[]>(`${this.base}/kpis/ranking-talleres${qs}`);
   }
 }

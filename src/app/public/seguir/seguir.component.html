@@ -1,0 +1,27 @@
+<div class="seguir">
+  <div #mapEl class="map"></div>
+
+  <div class="panel" *ngIf="data as d">
+    <div class="brand">Seguimiento en vivo</div>
+    <div class="estado" [class.activo]="d.tecnico">{{ estadoLegible(d.estado) }}</div>
+
+    <ng-container *ngIf="d.tecnico; else sinTec">
+      <div class="row"><span>Técnico</span><strong>{{ d.nombre_tecnico || 'En camino' }}</strong></div>
+      <div class="row" *ngIf="d.taller_nombre"><span>Taller</span><strong>{{ d.taller_nombre }}</strong></div>
+      <div class="row" *ngIf="d.eta_min !== null"><span>Llega en</span><strong>{{ d.eta_min }} min</strong></div>
+      <div class="row" *ngIf="d.distancia_km !== null"><span>Distancia</span><strong>{{ d.distancia_km }} km</strong></div>
+    </ng-container>
+    <ng-template #sinTec>
+      <div class="muted">Aún no hay un técnico en camino.</div>
+    </ng-template>
+
+    <div class="leyenda">
+      <span class="dot cli"></span> Cliente
+      <span class="dot tec"></span> Técnico
+    </div>
+  </div>
+
+  <div class="overlay" *ngIf="cargando">Cargando seguimiento…</div>
+  <div class="overlay error" *ngIf="error && !data">{{ error }}</div>
+  <div class="banner" *ngIf="!online">Sin conexión — reintentando…</div>
+</div>

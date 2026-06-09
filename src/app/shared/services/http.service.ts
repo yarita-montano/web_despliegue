@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
@@ -97,6 +97,21 @@ export class HttpService {
     return this.http.delete<T>(
       `${this.baseUrl}${endpoint}`,
       { headers: this.getHeaders() }
+    ).pipe(
+      catchError(error => this.handleError(error))
+    );
+  }
+
+  /**
+   * POST que devuelve un archivo binario (Blob), con la respuesta completa para
+   * poder leer la cabecera Content-Disposition (nombre del archivo). Se usa para
+   * descargar reportes generados en el backend (PDF/Excel).
+   */
+  postBlob(endpoint: string, body: any): Observable<HttpResponse<Blob>> {
+    return this.http.post(
+      `${this.baseUrl}${endpoint}`,
+      body,
+      { headers: this.getHeaders(), responseType: 'blob', observe: 'response' }
     ).pipe(
       catchError(error => this.handleError(error))
     );

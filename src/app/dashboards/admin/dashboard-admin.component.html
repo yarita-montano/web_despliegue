@@ -80,5 +80,25 @@
       </nav>
       <app-admin-servicios></app-admin-servicios>
     }
+
+    <!-- Vista Asistente de Reportes (lenguaje natural + voz) -->
+    @if (vistaActual === 'reportes') {
+      <nav class="nav-volver">
+        <button (click)="irAInicio()" class="btn-volver">
+          ← Volver al inicio
+        </button>
+      </nav>
+      <app-admin-reportes></app-admin-reportes>
+    }
+
+    <!-- Vista KPIs / Analitica -->
+    @if (vistaActual === 'kpis') {
+      <nav class="nav-volver">
+        <button (click)="irAInicio()" class="btn-volver">
+          ← Volver al inicio
+        </button>
+      </nav>
+      <app-admin-kpis></app-admin-kpis>
+    }
   </main>
 </div>

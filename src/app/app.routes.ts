@@ -12,6 +12,7 @@ import { ServiciosComponent } from './dashboards/taller/servicios/servicios.comp
 import { CancelacionesComponent } from './dashboards/taller/cancelaciones/cancelaciones.component';
 import { KpisComponent } from './dashboards/taller/kpis/kpis.component';
 import { UnauthorizedComponent } from './shared/pages/unauthorized.component';
+import { SeguirComponent } from './public/seguir/seguir.component';
 import { authGuard, tipoGuard, adminGuard, publicGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
@@ -61,6 +62,12 @@ export const routes: Routes = [
   {
     path: 'unauthorized',
     component: UnauthorizedComponent
+  },
+  {
+    // Pagina PUBLICA de seguimiento en vivo (opcion C). SIN guard: cualquiera
+    // con el token puede verla, sin login ni app.
+    path: 'seguir/:token',
+    component: SeguirComponent
   },
   {
     path: '**',

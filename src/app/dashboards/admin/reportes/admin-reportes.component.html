@@ -1,0 +1,115 @@
+<section class="reportes-container">
+  <header class="reportes-head">
+    <h2>🗣️ Asistente de Reportes</h2>
+    <p class="sub">Escribe o dicta lo que necesitas y la IA arma el reporte. Exporta a PDF o Excel.</p>
+  </header>
+
+  <!-- Entrada en lenguaje natural -->
+  <div class="card consulta-card">
+    <div class="consulta-row">
+      <input
+        type="text"
+        class="consulta-input"
+        placeholder="Ej: incidentes del último mes por taller"
+        [ngModel]="texto()"
+        (ngModelChange)="texto.set($event)"
+        (keyup.enter)="interpretar()"
+      />
+      @if (voz.soportado()) {
+        <button
+          class="btn-mic"
+          [class.escuchando]="voz.escuchando()"
+          (click)="dictar()"
+          [disabled]="voz.escuchando() || interpretando()"
+          title="Dictar por voz"
+        >
+          {{ voz.escuchando() ? '🔴' : '🎤' }}
+        </button>
+      }
+      <button
+        class="btn-aplicar"
+        (click)="interpretar()"
+        [disabled]="interpretando() || !texto().trim()"
+      >
+        {{ interpretando() ? 'Interpretando…' : 'Generar' }}
+      </button>
+    </div>
+
+    <div class="ejemplos">
+      <span class="ejemplos-label">Ejemplos:</span>
+      @for (e of ejemplos; track e) {
+        <button class="chip" (click)="usarEjemplo(e)">{{ e }}</button>
+      }
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert-error">{{ error() }}</div>
+  }
+
+  <!-- Aclaración cuando la IA no identifica un reporte del catálogo -->
+  @if (spec(); as s) {
+    @if (!s.report_id) {
+      <div class="card aclaracion-card">
+        <p class="aclaracion-txt">{{ s.aclaracion }}</p>
+        @if (s.sugerencias?.length) {
+          <div class="ejemplos">
+            <span class="ejemplos-label">¿Quizás?</span>
+            @for (sug of s.sugerencias; track sug) {
+              <button class="chip" (click)="usarEjemplo(sug)">{{ sug }}</button>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+
+  @if (ejecutando()) {
+    <div class="loading">Cargando datos del reporte…</div>
+  }
+
+  <!-- Resultado tabular + exportación -->
+  @if (resultado(); as r) {
+    <div class="card resultado-card">
+      <div class="resultado-head">
+        <div>
+          <h3>{{ r.titulo }}</h3>
+          <p class="sub">{{ r.filas.length }} fila(s)</p>
+        </div>
+        <div class="export-btns">
+          <button class="btn-export pdf" (click)="exportar('pdf')" [disabled]="exportando() !== null">
+            {{ exportando() === 'pdf' ? 'Generando…' : '⬇ PDF' }}
+          </button>
+          <button class="btn-export excel" (click)="exportar('excel')" [disabled]="exportando() !== null">
+            {{ exportando() === 'excel' ? 'Generando…' : '⬇ Excel' }}
+          </button>
+        </div>
+      </div>
+
+      @if (r.filas.length) {
+        <div class="tabla-wrap">
+          <table class="tabla">
+            <thead>
+              <tr>
+                @for (col of r.columnas; track col) {
+                  <th>{{ col }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (fila of r.filas; track $index) {
+                <tr>
+                  @for (col of r.columnas; track col) {
+                    <td>{{ fila[col] }}</td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="vacio">Sin datos para el periodo seleccionado.</p>
+      }
+    </div>
+  }
+</section>

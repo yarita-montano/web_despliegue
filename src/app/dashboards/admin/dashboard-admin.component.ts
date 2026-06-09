@@ -9,17 +9,19 @@ import { catchError, finalize } from 'rxjs/operators';
 import { AdminTalleresComponent } from './talleres/admin-talleres.component';
 import { AdminGananciasComponent } from './ganancias/admin-ganancias.component';
 import { AdminServiciosComponent } from './servicios/admin-servicios.component';
+import { AdminReportesComponent } from './reportes/admin-reportes.component';
+import { AdminKpisComponent } from './kpis/admin-kpis.component';
 
 @Component({
   selector: 'app-dashboard-admin',
   standalone: true,
-  imports: [CommonModule, AdminTalleresComponent, AdminGananciasComponent, AdminServiciosComponent],
+  imports: [CommonModule, AdminTalleresComponent, AdminGananciasComponent, AdminServiciosComponent, AdminReportesComponent, AdminKpisComponent],
   templateUrl: './dashboard-admin.component.html',
   styleUrl: './dashboard-admin.component.scss'
 })
 export class DashboardAdminComponent implements OnInit {
   currentUser: User | null = null;
-  vistaActual: 'inicio' | 'talleres' | 'ganancias' | 'servicios' = 'inicio';
+  vistaActual: 'inicio' | 'talleres' | 'ganancias' | 'servicios' | 'reportes' | 'kpis' = 'inicio';
   statsLoading = false;
 
   stats = [
@@ -33,6 +35,8 @@ export class DashboardAdminComponent implements OnInit {
     { icon: '🏢', label: 'Gestionar Talleres', action: 'talleres' },
     { icon: '🔧', label: 'Gestionar Servicios', action: 'servicios' },
     { icon: '📊', label: 'Reporte de Ganancias', action: 'ganancias' },
+    { icon: '📈', label: 'KPIs / Analitica', action: 'kpis' },
+    { icon: '🗣️', label: 'Asistente de Reportes', action: 'reportes' },
   ];
 
   constructor(
@@ -97,10 +101,12 @@ export class DashboardAdminComponent implements OnInit {
 
   handleAction(action: string): void {
     console.log('[DashboardAdmin] handleAction →', { action, vistaActual: this.vistaActual });
-    const mapa: Record<string, 'talleres' | 'ganancias' | 'servicios'> = {
+    const mapa: Record<string, 'talleres' | 'ganancias' | 'servicios' | 'reportes' | 'kpis'> = {
       talleres: 'talleres',
       ganancias: 'ganancias',
       servicios: 'servicios',
+      reportes: 'reportes',
+      kpis: 'kpis',
       workshops: 'talleres',
       reports: 'ganancias',
     };
